@@ -23,7 +23,7 @@
  *  8 SHR                C:A = C:A >> 1
  *  9 ADD                C:A = ext(A) + ext(C)
  * 10 SUB                C:A = ext(A) - ext(C)
- * 11 J   address        AC = PC+3; PC = address
+ * 11 J   address        C:A = PC+3; PC = address
  * 12 TST X,Y,Z          PC = PC + 1 + (A<0 ? ext(X)
  *                                          : (A=0 ? ext(Y)
  *                                                 : ext(Z)))

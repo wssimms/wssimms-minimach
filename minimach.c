@@ -34,7 +34,7 @@
  *   0xFF00 - 0xFFFF : memory mapped i/o
  *
  * I/O area
- *   0xFF00 : R - getchar(), W - putchar(A)
+ *   0xFF00 : R - A = getchar(), W - putchar(A)
  */
 
 int options (int argc, char **argv);

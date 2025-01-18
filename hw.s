@@ -9,38 +9,9 @@ main:
 	L	pmsg+1
 	S	stkw+1
 	JUMP	phw
-
-;	L	0xEFFE
-;	SHR
-;	SHR
-;	SHR
-;	SHR
-;	SWAP
-;	L	c15
-;	AND
-;	SWAP
-;	L	c48
-;	OR
-;	S	outloc
-;	L	0xEFFE
-;	SWAP
-;	L	c15
-;	AND
-;	SWAP
-;	L	c48
-;	OR
-;	S	outloc
-;	L	zero
-;	SWAP
-;	L	c10
-;	S	outloc
-
  	JUMP	puts
 	END
-	
-;c10:	10
-;c15:	15
-;c48:	48
+
 	
 phw:	
 	;; push 16-bit value onto stack

@@ -11,6 +11,7 @@
  *    and receives high byte results of <<, >>, +, - operations
  *
  * ext(unsigned_byte) is defined: ((uint16_t)unsigned_byte)
+ * sext(unsigned_byte) is defined: ((uint16_t)(int16_t)(int8_t)unsigned_byte)
  *
  *  0 END                stop processor
  *  1 L     address      A = read(address)
@@ -24,9 +25,9 @@
  *  9 ADD                C:A = ext(A) + ext(C)
  * 10 SUB                C:A = ext(A) - ext(C)
  * 11 JUMP  address      C:A = PC+3; PC = address
- * 12 TEST  X,Y,Z        PC = PC + 1 + (A<0 ? ext(X)
- *                                          : (A=0 ? ext(Y)
- *                                                 : ext(Z)))
+ * 12 TEST  X,Y,Z        PC = PC + 1 + (A<0 ? sext(X)
+ *                                          : (A=0 ? sext(Y)
+ *                                                 : sext(Z)))
  *
  * Memory Map
  *   0x0000 - 0xEFFF : read/write memory
@@ -39,8 +40,8 @@
 
 int options (int argc, char **argv);
 
-//#define EXTEND(ub) ((uint16_t)(int16_t)(int8_t)(ub))
-#define EXTEND(ub) ((uint16_t)(ub))
+#define EXT(ub) ((uint16_t)(ub))
+#define SEXT(ub) ((uint16_t)(int16_t)(int8_t)(ub))
 
 union {
     uint8_t b[2];
@@ -178,13 +179,13 @@ void execute (void)
 #endif
             break;
         case 9:                                      /* ADD */
-	    ac.w = EXTEND(ac.b[0]) + EXTEND(ac.b[1]);
+	    ac.w = EXT(ac.b[0]) + EXT(ac.b[1]);
 #ifdef DBG
 	    printf("ADD                 ");
 #endif
             break;
         case 10:                                     /* SUB */
-            ac.w = EXTEND(ac.b[0]) - EXTEND(ac.b[1]);
+            ac.w = EXT(ac.b[0]) - EXT(ac.b[1]);
 #ifdef DBG
 	    printf("SUB                 ");
 #endif
@@ -200,11 +201,11 @@ void execute (void)
             break;
         case 12:                                     /* TST */
             if (ac.b[0] < 0)
-                tm.w = EXTEND(mem[pc.w+0]);
+                tm.w = SEXT(mem[pc.w+0]);
             else if (ac.b[0] > 0)
-                tm.w = EXTEND(mem[pc.w+2]);
+                tm.w = SEXT(mem[pc.w+2]);
             else
-                tm.w = EXTEND(mem[pc.w+1]);
+                tm.w = SEXT(mem[pc.w+1]);
             pc.w += tm.w;
 #ifdef DBG
 	    printf("TEST                ");

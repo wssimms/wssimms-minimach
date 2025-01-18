@@ -107,7 +107,7 @@ void reset (void)
     pc.b[1] = mem[0xFEFF];
 }
 
-//#define DBG 400
+//#define DBG 500
 
 void execute (void)
 {
@@ -116,6 +116,28 @@ void execute (void)
     unsigned count = 0;
 #endif    
     while (1) {
+
+	/*
+	if (pc.w == 64) {
+	    printf("uquo:%2.2x%2.2x  urem:%2.2x%2.2x\n",
+		   mem[503],mem[502],mem[505],mem[504]);
+	}
+	else if (pc.w == 78) {
+	    //static int count = 0;
+	    printf("dbuf: ");
+	    for (int i = 0; i < 6; ++i) {
+		if (mem[220+i] >= '0' && mem[220+i] <= '9')
+		    printf("'%c'", mem[220+i]);
+		else
+		    printf("%d", mem[220+i]);
+		if (i != 5)
+		    printf(",");
+	    }
+	    printf("\n");
+	    //if (++count == 5) break;
+	}
+	*/
+	
 	opcode = mem[pc.w++];
 #ifdef DBG	
 	printf("%4d ", pc.w-1);
@@ -200,15 +222,15 @@ void execute (void)
 #endif
             break;
         case 12:                                     /* TST */
-            if (ac.b[0] < 0)
+	    if (((int16_t)SEXT(ac.b[0])) < 0)
                 tm.w = SEXT(mem[pc.w+0]);
-            else if (ac.b[0] > 0)
+            else if (((int16_t)SEXT(ac.b[0])) > 0)
                 tm.w = SEXT(mem[pc.w+2]);
             else
                 tm.w = SEXT(mem[pc.w+1]);
             pc.w += tm.w;
 #ifdef DBG
-	    printf("TEST                ");
+	    printf("TEST  %4.4x          ", SEXT(ac.b[0]));
 #endif
             break;
         default:

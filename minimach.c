@@ -12,10 +12,10 @@
  *
  * ext(unsigned_byte) is defined: ((uint16_t)unsigned_byte)
  *
- *  0 E                  stop processor
- *  1 L   address        A = read(address)
- *  2 S   address        write(address, A)
- *  3 SWP                swaps A and C
+ *  0 END                stop processor
+ *  1 L     address      A = read(address)
+ *  2 S     address      write(address, A)
+ *  3 SWAP               swaps A and C
  *  4 AND                A = A & C
  *  5 OR                 A = A | C
  *  6 EOR                A = A ^ C
@@ -23,8 +23,8 @@
  *  8 SHR                C:A = C:A >> 1
  *  9 ADD                C:A = ext(A) + ext(C)
  * 10 SUB                C:A = ext(A) - ext(C)
- * 11 J   address        C:A = PC+3; PC = address
- * 12 TST X,Y,Z          PC = PC + 1 + (A<0 ? ext(X)
+ * 11 JUMP  address      C:A = PC+3; PC = address
+ * 12 TEST  X,Y,Z        PC = PC + 1 + (A<0 ? ext(X)
  *                                          : (A=0 ? ext(Y)
  *                                                 : ext(Z)))
  *
@@ -39,6 +39,10 @@
 
 int options (int argc, char **argv);
 
+<<<<<<< HEAD
+=======
+//#define EXTEND(ub) ((uint16_t)(int16_t)(int8_t)(ub))
+>>>>>>> cd2dcea (Commit local copy (with debugging #ifdefs))
 #define EXTEND(ub) ((uint16_t)(ub))
 
 union {
@@ -70,7 +74,10 @@ uint8_t program[] = {
 
 uint8_t rd (uint16_t a)
 {
-    if (a < 0xF000) return mem[a];
+    if (a < 0xF000) {
+	//printf("L %4.4x : %2.2x\n", a, mem[a]);
+	return mem[a];
+    }
     if (a < 0xFF00) return rom[a - 0xFF00];
     
     switch (a & 255) {
@@ -83,6 +90,7 @@ void wr (uint16_t a, uint8_t b)
 {
     if (a < 0xF000) {
 	mem[a] = b;
+	//printf("S %4.4x <- %2.2x\n", a, b);
 	return;
     }
     
@@ -101,7 +109,7 @@ void reset (void)
     pc.b[1] = mem[0xFEFF];
 }
 
-//#define DBG 100
+//#define DBG 400
 
 void execute (void)
 {
@@ -112,53 +120,86 @@ void execute (void)
     while (1) {
 	opcode = mem[pc.w++];
 #ifdef DBG	
-	printf("pc:%3d  ac:%4.4x  a:%3d  [%3d]\n", pc.w-1, ac.w, ac.b[0], opcode);
-	if (++count > DBG) break;
+	printf("%4d ", pc.w-1);
 #endif	
         switch (opcode) {
         case 0:                                      /* E */
+	    printf("End at pc = %d\n", pc.w-1);
             return;
         case 1:                                      /* L */
             tm.b[0] = mem[pc.w++];
             tm.b[1] = mem[pc.w++];
 	    ac.b[0] = rd(tm.w);
+#ifdef DBG
+	    printf("L    %5d (%2.2x/%3d) ", tm.w, ac.b[0], ac.b[0]);
+#endif
 	    break;
         case 2:                                      /* S */
             tm.b[0] = mem[pc.w++];
             tm.b[1] = mem[pc.w++];
 	    wr(tm.w, ac.b[0]);
+#ifdef DBG
+	    printf("S    %5d (%2.2x/%3d) ", tm.w, ac.b[0], ac.b[0]);
+#endif
             break;
         case 3:                                      /* SW */
             tm.b[0] = ac.b[0];
             ac.b[0] = ac.b[1];
             ac.b[1] = tm.b[0];
+#ifdef DBG
+	    printf("SWAP                ");
+#endif
             break;
         case 4:                                      /* AND */
             ac.b[0] = ac.b[0] & ac.b[1];
+#ifdef DBG
+	    printf("AND                 ");
+#endif
             break;
         case 5:                                      /* OR */
             ac.b[0] = ac.b[0] | ac.b[1];
+#ifdef DBG
+	    printf("OR                  ");
+#endif
             break;
         case 6:                                      /* EOR */
             ac.b[0] = ac.b[0] ^ ac.b[1];
+#ifdef DBG
+	    printf("EOR                 ");
+#endif
             break;
         case 7:                                      /* SHL */
             ac.w <<= 1;
+#ifdef DBG
+	    printf("SHL                 ");
+#endif
             break;
         case 8:                                      /* SHR */
 	    ac.w >>= 1;
+#ifdef DBG
+	    printf("SHR                 ");
+#endif
             break;
         case 9:                                      /* ADD */
 	    ac.w = EXTEND(ac.b[0]) + EXTEND(ac.b[1]);
+#ifdef DBG
+	    printf("ADD                 ");
+#endif
             break;
         case 10:                                     /* SUB */
             ac.w = EXTEND(ac.b[0]) - EXTEND(ac.b[1]);
+#ifdef DBG
+	    printf("SUB                 ");
+#endif
             break;
         case 11:                                     /* J */
             tm.b[0] = mem[pc.w++];
             tm.b[1] = mem[pc.w++];
 	    ac.w = pc.w;
             pc.w = tm.w;
+#ifdef DBG
+	    printf("JUMP %5d          ", tm.w);
+#endif
             break;
         case 12:                                     /* TST */
             if (ac.b[0] < 0)
@@ -168,11 +209,19 @@ void execute (void)
             else
                 tm.w = EXTEND(mem[pc.w+1]);
             pc.w += tm.w;
+#ifdef DBG
+	    printf("TEST                ");
+#endif
             break;
         default:
 	    reset();
             break;
         }
+#ifdef DBG
+	printf(" CA:%4.4x/%5d  C:%2.2x/%3d  A:%2.2x/%3d\n",
+	       ac.w, ac.w, ac.b[1], ac.b[1], ac.b[0], ac.b[0]);
+	if (++count > DBG) break;
+#endif
     }
 }
 
@@ -264,6 +313,11 @@ int options (int argc, char **argv)
 			    sz, argv[prog], proglen);
 		    prog = 0;
 		}
+		/*
+		for (size_t i = 0; i < sz; ++i) {
+		    printf("%lu: %d\n", i, mem[i]);
+		}
+		*/
 	    }
 	}
 	else {

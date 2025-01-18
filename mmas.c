@@ -155,9 +155,19 @@ void stringize (uint64_t n, char *s)
 
 int lookup (uint64_t *n)
 {
+    char sname[12];
+    char msg[44];
+    
     for (int i = 0; i < nsyms; ++i) {
 	if (*n == symtab[i].name) {
 	    tokval = i;
+
+	    if (pass > 0 && symdef[i] == 0) {
+		stringize(*n, sname);
+		sprintf(msg, "Undefined synbol '%s'.", sname);
+		error(msg);
+	    }
+	    
 	    return symtab[i].token;
 	}
     }
@@ -448,9 +458,11 @@ int term (int *value)
     }
 
     if (token == TSYM || token == TLAB) {
+	/*
 	char sname[12];
 	stringize(symtab[tokval].name, sname);
-	//printf("%s: %d\n", sname, symtab[tokval].value);
+	printf("%s: %d\n", sname, symtab[tokval].value);
+	*/
 	*value = symtab[tokval].value;
 	return 0;
     }
@@ -891,6 +903,7 @@ void assemble (char *fname)
     lines = 1;
     dopass();
 
+    /*
     for (int i = 0; i < nsyms; ++i) {
 	if (symdef[i] == 0) {
 	    char sname[12];
@@ -899,6 +912,7 @@ void assemble (char *fname)
 	    ++errors;
 	}
     }
+    */
     
     if (errors) return;
     
@@ -911,8 +925,10 @@ void assemble (char *fname)
 
     fclose(outf);
     fclose(inf);
-    
-    dumpsyms();    
+
+    /*
+    if (errors == 0) dumpsyms();
+    */
 }
 
 //#define TESTSCAN

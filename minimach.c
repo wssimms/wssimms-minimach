@@ -3,7 +3,7 @@
 #include <stdint.h>
 
 /*
- * Machine Description (v1.1)
+ * Machine Description (v1.2)
  *
  * PC: 16 bit program counter
  * A: 8 bit accumulator

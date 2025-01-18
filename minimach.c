@@ -3,14 +3,14 @@
 #include <stdint.h>
 
 /*
- * Machine Description (v1.0)
+ * Machine Description (v1.1)
  *
  * PC: 16 bit program counter
  * A: 8 bit accumulator
  * C: 8 bit register that is used as an operand in ALU operations
  *    and receives high byte results of <<, >>, +, - operations
  *
- * ext(unsigned_byte) is defined: ((uint16_t)(int16_t)(int8_t)unsigned_byte)
+ * ext(unsigned_byte) is defined: ((uint16_t)unsigned_byte)
  *
  *  0 E                  stop processor
  *  1 L   address        A = read(address)
@@ -39,7 +39,7 @@
 
 int options (int argc, char **argv);
 
-#define EXTEND(ub) ((uint16_t)(int16_t)(int8_t)(ub))
+#define EXTEND(ub) ((uint16_t)(ub))
 
 union {
     uint8_t b[2];

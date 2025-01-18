@@ -117,27 +117,6 @@ void execute (void)
 #endif    
     while (1) {
 
-	/*
-	if (pc.w == 64) {
-	    printf("uquo:%2.2x%2.2x  urem:%2.2x%2.2x\n",
-		   mem[503],mem[502],mem[505],mem[504]);
-	}
-	else if (pc.w == 78) {
-	    //static int count = 0;
-	    printf("dbuf: ");
-	    for (int i = 0; i < 6; ++i) {
-		if (mem[220+i] >= '0' && mem[220+i] <= '9')
-		    printf("'%c'", mem[220+i]);
-		else
-		    printf("%d", mem[220+i]);
-		if (i != 5)
-		    printf(",");
-	    }
-	    printf("\n");
-	    //if (++count == 5) break;
-	}
-	*/
-	
 	opcode = mem[pc.w++];
 #ifdef DBG	
 	printf("%4d ", pc.w-1);

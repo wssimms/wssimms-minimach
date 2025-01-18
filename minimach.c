@@ -39,10 +39,7 @@
 
 int options (int argc, char **argv);
 
-<<<<<<< HEAD
-=======
 //#define EXTEND(ub) ((uint16_t)(int16_t)(int8_t)(ub))
->>>>>>> cd2dcea (Commit local copy (with debugging #ifdefs))
 #define EXTEND(ub) ((uint16_t)(ub))
 
 union {

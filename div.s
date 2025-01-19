@@ -189,7 +189,7 @@ icptr1:	JUMP	0
 	
 
 puts:
-	;; output a string, a ptr to which is on the stack
+	;; output a string, a ptr to which is in variable 'pmsg'
 	S	puts1+1
 	SWAP
 	S	puts1+2		;save the return address

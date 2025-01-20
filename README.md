@@ -108,3 +108,90 @@ The following memory mapped I/O addresses are available:
 	      W: writes the contents of A to standard output.
 ```
 
+## Compiling the virtual machine
+
+The virtual machine source file (minimach.c) is standard C (but perhaps dependent on little-endian byte order in the host machine) and has no dependencies apart from the standard library. It can be compiled as follows:
+
+cc -o mm minimach.c
+
+## Running the virtual machine
+
+The result of compiling minimach.c can be run directly without command line arguments. In this case, a short, built-in "hello world" program is executed. A binary file for execution can be supplied on the command line like so:
+
+./mm myprog.o
+
+In this case, the binary file "myprog.o" will be loaded into the virtual machine's read/write memory beginning at location 0, and then executed, again starting at location 0.
+
+A binary file can be loaded into the virtual machine's read only memory by using the -r command like switch like so:
+
+./mm -r myrom.o
+
+This causes the binary file "myrom.o" to be loaded into the virtual machine's read only memory beginning at location 0xF000.
+
+Of course, one may supply both two binary files, one for read/write memory and one for read only memory like so:
+
+./mm -r myrom.o myprog.o
+
+## How to obtain binary files to execute
+
+The repository also includes a simple assembler, the source code for which is found in the file "mmas.c". This program is also written in standard C, also however dependent on a little endian host machine, and can be compiled like so:
+
+cc -o mmas mmas.c
+
+Once compiled, this assembler will assemble assembly language source files for the minimal CPU virtual machine using the instruction mnemonics given above.
+
+## More about "minimach" assembly language
+
+### Labels
+
+Labels may be up to 8 characters long, and must be followed by a colon (:).
+
+### Data
+
+Data may be included in the program simply by typing it into the assembly language source file like this:
+```
+1,2,3,4
+```
+Each of the comma-separated items produces one byte in the output file. Each is actually an arithmetic expression, so the following is equivalent:
+```
+4-2,16/8,1&2,(6/2)^(3+4)
+```
+Expressions of this type may also be used as operands to the load, store, jump, and test instructions.
+
+A 16-bit value may be included in the program by placing each of its constituent bytes in the file, in little endian order, like so:
+```
+<12345,>12345
+```
+Character data may be included in the program inside double quotes like so:
+```
+"Hello",0
+```
+Unlike in C, a null byte is not automatically included, so the example above explicitly provides a terminating null byte.
+
+Comments are preceded by a semicolon (;) character as is usual in assembly language programs.
+
+### Symbols
+
+Symbolic constants may be defined using the '=' operator like so:
+```
+rom = 0xF000
+```
+These are generally useful only as addresses as the virtual CPU has no immediate addressing modes.
+
+The 'curent location' during assembly is represented by the character '.' and this character can be used to reserve zero-filled space in a program by using an expresion like:
+```
+.=.+16
+```
+to reserve 16 bytes. The current location may only be advanced, so an expression like this:
+```
+.=.-1
+```
+is not allowed. The character '.' can also be used to build targets for the jump and test instructions like so:
+```
+          TEST   .+4,itszero,.+4
+	  ...
+itszero:	 
+```
+This will cause a jump to the label itszero if the contents of A are zero. Otherwise execution will continue with the instruction after the test instruction, as that is the value at .+4, where . is the address of the TEST instruction.
+
+Examination of the sample programs 'hw.s' and 'div.s' will help clarify how assembly language programs may be written.

@@ -76,6 +76,9 @@ Opcode	      Mnemonic
 The instructions and their operation is briefly recapitulated below using
 C language notation:
 
+  ext(unsigned_byte) is defined: ((uint16_t)unsigned_byte)
+  sext(unsigned_byte) is defined: ((uint16_t)(int16_t)(int8_t)unsigned_byte)
+ 
   0    END                stop processor
   1    L     address      A = read(address)
   2    S     address      write(address, A)

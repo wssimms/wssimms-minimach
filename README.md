@@ -157,7 +157,7 @@ Data may be included in the program simply by typing it into the assembly langua
 ```
 Each of the comma-separated items produces one byte in the output file. Each is actually an arithmetic expression, so the following is equivalent:
 ```
-4-1,16/8,1|2,(6/2)^(3+4)
+4-3,16/8,1|2,(6/2)^(3+4)
 ```
 Expressions of this type may also be used as operands to the load, store, jump, and test instructions.
 

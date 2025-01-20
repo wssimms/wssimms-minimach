@@ -3,7 +3,7 @@
 #include <stdint.h>
 
 /*
- * Machine Description (v1.2)
+ * Machine Description (v1.3)
  *
  * PC: 16 bit program counter
  * A: 8 bit accumulator
@@ -17,9 +17,9 @@
  *  1 L     address      A = read(address)
  *  2 S     address      write(address, A)
  *  3 SWAP               swaps A and C
- *  4 AND                A = A & C
- *  5 OR                 A = A | C
- *  6 EOR                A = A ^ C
+ *  4 AND                A = A & C; C = ~(A & C)
+ *  5 OR                 A = A | C; C = ~(A | C)
+ *  6 EOR                A = A ^ C; C = ~(A ^ C)
  *  7 SHL                C:A = C:A << 1
  *  8 SHR                C:A = C:A >> 1
  *  9 ADD                C:A = ext(A) + ext(C)
@@ -151,18 +151,21 @@ void execute (void)
             break;
         case 4:                                      /* AND */
             ac.b[0] = ac.b[0] & ac.b[1];
+            ac.b[1] = ~(ac.b[0]);
 #ifdef DBG
 	    printf("AND                 ");
 #endif
             break;
         case 5:                                      /* OR */
             ac.b[0] = ac.b[0] | ac.b[1];
+            ac.b[1] = ~(ac.b[0]);
 #ifdef DBG
 	    printf("OR                  ");
 #endif
             break;
         case 6:                                      /* EOR */
             ac.b[0] = ac.b[0] ^ ac.b[1];
+            ac.b[1] = ~(ac.b[0]);
 #ifdef DBG
 	    printf("EOR                 ");
 #endif

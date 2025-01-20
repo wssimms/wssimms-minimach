@@ -1,19 +1,13 @@
 
 	;; Edit the following to specify the maximum number to be
 	;; checked for primeness. MAXVAL must be >= 3 and <= 32767
-	MAXVAL = 100
+	MAXVAL = 500
 
 	;; writing to this address prints a character to the terminal
 	outloc = 0xFF00
 
 ;;; prime sieve
-;;; 
-;;; This could be better. Specifically, it does not stop dividing the
-;;; number currently being checked with successive numbers from the
-;;; list of primes when the current prime exceeds the square root
-;;; of the number being checked, at it should. So it is therefore
-;;; unnecessarily slow for 'large' values of MAXVAL.
-	
+
 	;; print message
 	L	pintro
 	S	pmsg
@@ -32,19 +26,32 @@
 	;; print initial 2 in pvec
 	L	pvec
 	S	decv
-	L	pvec+2
+	L	pvec+1
 	S	decv+1
 	JUMP	pdec
 cknum:
+	;; this is the head of the outermost loop, in which we check
+	;; to see if the current 'tnum' is prime. tnum is initialized
+	;; to 3, and is incremented by 2 every time through this loop.
 	L	pptr
 	S	cptr
 	L	pptr+1
 	S	cptr+1		;initialize cptr to start of pvec
-cknum0:	
+	L	tnum
+	S	sqrtv
+	L	tnum+1
+	S	sqrtv+1
+	JUMP	sqrt		;find sqrt of tnum
+cknum0:
+	;; this is the head of the next loop that checks to see if each
+	;; of the currently stored primes in turn divides tnum with a
+	;; zero remainder.
 	L	tnum
 	S	dend
 	L	tnum+1
 	S	dend+1
+	;; get the 16-bit word pointed to by variable 'cptr'
+	;; into the the variable 'dsor' (the divisor)
 	L	cptr
 	S	cknum1+1
 	L	cptr+1
@@ -61,14 +68,29 @@ cknum2:
 	L	0		;hi byte of next prime
 	S	dsor+1
 	JUMP	icptr
+	;; before we divide, check to see if the prime number is
+	;; greater than the integer square root of 'tnum'. If it is,
+	;; then it can't possibly divide 'tnum' and thus 'tnum' is prime
+	;; the sqrt of 'tnum' is necessarily only one byte, so if the
+	;; hi byte of the prime != 0, then no need to check further
+	L	dsor+1
+	TEST	cknum5,.+4,cknum5 ;cknum5 is the label for "it's prime"
+	L	sqrtm
+	SWAP
+	L	dsor
+	SUB
+	TEST	.+4,.+4,cknum5
 	JUMP	udiv		;divide tnum by prime
 	L	urem
 	SWAP
 	L	urem+1
 	OR			;check for 0 remainder
-	TEST	cknum4,cknumB,cknum4
+	TEST	cknum0,cknumB,cknum0
 cknumB:
-	;; increment tnum
+	;; this is the bottom of the outermost loop. Here we increment tnum,
+	;; and if the incremented tnum > enum, then exit the loop and the
+	;; program. Otherwise go back to the top of the outermost loop to
+	;; check the newly incremented value of tnum for primeness.
 	L	c2
 	SWAP
 	L	tnum
@@ -83,39 +105,28 @@ cknumB:
 	L	enum+1
 	SUB
 	SWAP			;check borrow
-	TEST	cknumC,.+4,.+4  ;enum < tnum => finished
+	TEST	cknum3,.+4,.+4  ;enum < tnum => finished
 	SWAP			;check result
-	TEST	cknum3,.+4,cknum3 ; enum != tnum => next tnum
+	TEST	cknum4,.+4,cknum4 ; enum != tnum => next tnum
 	L	tnum
 	SWAP
 	L	enum
 	SUB
 	SWAP			;check borrow
-	TEST	cknumC,cknum3,cknum3	;enum < tnum => finished
-cknumC:	
+	TEST	cknum3,cknum4,cknum4	;enum < tnum => finished
+cknum3:	
 	;; here tnum >= enum
 	JUMP	done
-cknum3:	
+cknum4:	
 	;; try again
 	JUMP	cknum		;loop check next tnum
-cknum4:
-	;; here remainder was not 0
-	L	cptr+1
-	SWAP
-	L	nptr+1
-	SUB			;check cptr (hi) == nptr (hi)
-	TEST	cknumA,.+4,cknumA
-	L	cptr
-	SWAP
-	L	nptr
-	SUB			;check cptr (lo) == nptr (lo)
-	TEST	.+4,cknum5,.+4
-cknumA:	
-	;; here cptr != nptr, so try the next prime
-	JUMP	cknum0
 cknum5:
-	;; here cptr == nptr, all primes have been checked
-	;; this means tnum is prime
+	;; here all primes <= sqrt(tnum) have been checked and
+	;; don't divide tnum, so tnum is prime
+	L	nptr
+	S	cptr
+	L	nptr+1
+	S	cptr+1		;set cptr at end of prime list
 	;; print the prime
 	L	comma
 	S	outloc		;print ','
@@ -216,73 +227,73 @@ puts1:	JUMP	0		;return to caller
 pmsg:	.=.+2
 
 
-;; 	;; print a 16-bit number as 4 hexadecimal digits
-;; phex:
-;; 	S	phex1+1
-;; 	SWAP
-;; 	S	phex1+2		;store return address
-;; 	L	c0
-;; 	SWAP
-;; 	L	decv+1
-;; 	SHR
-;; 	SHR
-;; 	SHR
-;; 	SHR
-;; 	S	hdig
-;; 	JUMP	phdig
-;; 	L	c15
-;; 	SWAP
-;; 	L	decv+1
-;; 	AND
-;; 	S	hdig
-;; 	JUMP	phdig
-;; 	L	c0
-;; 	SWAP
-;; 	L	decv
-;; 	SHR
-;; 	SHR
-;; 	SHR
-;; 	SHR
-;; 	S	hdig
-;; 	JUMP	phdig
-;; 	L	c15
-;; 	SWAP
-;; 	L	decv
-;; 	AND
-;; 	S	hdig
-;; 	JUMP	phdig
-;; phex1:
-;; 	JUMP	0
+	;; print a 16-bit number as 4 hexadecimal digits
+phex:
+	S	phex1+1
+	SWAP
+	S	phex1+2		;store return address
+	L	c0
+	SWAP
+	L	decv+1
+	SHR
+	SHR
+	SHR
+	SHR
+	S	hdig
+	JUMP	phdig
+	L	c15
+	SWAP
+	L	decv+1
+	AND
+	S	hdig
+	JUMP	phdig
+	L	c0
+	SWAP
+	L	decv
+	SHR
+	SHR
+	SHR
+	SHR
+	S	hdig
+	JUMP	phdig
+	L	c15
+	SWAP
+	L	decv
+	AND
+	S	hdig
+	JUMP	phdig
+phex1:
+	JUMP	0
 
-;; 	;; print a value in the range 0-15 as a hexadecimal digit
-;; phdig:
-;; 	S	phdig2+1
-;; 	SWAP
-;; 	S	phdig2+2	;store return address
-;; 	L	hdig
-;; 	SWAP
-;; 	L	c10
-;; 	SUB
-;; 	TEST	.+4,.+4,phdig1
-;; 	L	hdig
-;; 	SWAP
-;; 	L	zero
-;; 	ADD
-;; 	SWAP
-;; 	L	c7
-;; 	ADD
-;; 	S	outloc
-;; 	JUMP	phdig2
-;; phdig1:
-;; 	L	hdig
-;; 	SWAP
-;; 	L	zero
-;; 	ADD
-;; 	S	outloc
-;; phdig2:
-;; 	JUMP	0
+	;; print a value in the range 0-15 as a hexadecimal digit
+phdig:
+	S	phdig2+1
+	SWAP
+	S	phdig2+2	;store return address
+	L	hdig
+	SWAP
+	L	c10
+	SUB
+	TEST	.+4,.+4,phdig1
+	L	hdig
+	SWAP
+	L	zero
+	ADD
+	SWAP
+	L	c7
+	ADD
+	S	outloc
+	JUMP	phdig2
+phdig1:
+	L	hdig
+	SWAP
+	L	zero
+	ADD
+	S	outloc
+phdig2:
+	JUMP	0
 	
-;; hdig:	.=.+2
+hdig:	.=.+2
 	
 	
 	;; print a decimal number <= 32767 which
@@ -513,6 +524,80 @@ udiv9:
 udiv10:
 	JUMP	0		;return address will be filled in
 
+	;; finds the integer square root of the 16-bit positive
+	;; value in variable 'sqrtv'. The result is stored in the
+	;; variable 'sqrtm'.
+sqrt:
+	S	sqrt3+1
+	SWAP
+	S	sqrt3+2		;store return address
+	L	c1
+	S	sqrtd
+	L	c0
+	S	sqrtd+1		;start with divisor 0x0001
+sqrt0:	
+	L	sqrtv
+	S	dend
+	L	sqrtv+1
+	S	dend+1
+	L	sqrtd
+	S	dsor
+	L	sqrtd+1
+	S	dsor+1
+	JUMP	udiv		;divide num by divisor
+	;; now find the mean of the divisor and the quotient
+	L	uquo
+	SWAP
+	L	sqrtd
+	ADD			;add lo bytes
+	S	sqrtm		;remember lo byte sum for a moment
+	L	uquo+1
+	ADD			;add carry, if any
+	SWAP
+	L	sqrtd+1
+	ADD			;add hi bytes
+	SWAP			;hi byte sum in C
+	L	sqrtm		;lo byte sum in A
+	SHR			;divide by 2
+	S	sqrtm
+	SWAP
+	S	sqrtm+1		;store mean
+	;; if mean == divisor then done
+	L	sqrtd
+	SUB			;compare lo bytes of mean and divisor
+	TEST	sqrt1,.+4,sqrt1
+	L	sqrtm+1
+	SWAP
+	L	sqrtd+1
+	SUB			;compare hi bytes of mean and divisor
+	TEST	sqrt1,sqrt3,sqrt1
+sqrt1:
+	;; if mean == quotient then done
+	L	uquo
+	SWAP
+	L	sqrtm
+	SUB			;compare lo bytes of mean and quotient
+	TEST	sqrt2,.+4,sqrt2
+	L	uquo+1
+	SWAP
+	L	sqrtm+1
+	SUB			;compare hi bytes of mean and quotient
+	TEST	sqrt2,sqrt3,sqrt2
+sqrt2:
+	;; here we are not done, the mean is the new divisor
+	L	sqrtm
+	S	sqrtd
+	L	sqrtm+1
+	S	sqrtd+1
+	JUMP	sqrt0
+sqrt3:
+	JUMP	0		;return to caller
+	
+
+sqrtv:	.=.+2
+sqrtd:	.=.+2
+sqrtm:	.=.+2
+	
 pquo:	.=.+2
 uquo:	.=.+2
 urem:

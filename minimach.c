@@ -24,7 +24,7 @@
  *  8 SHR                C:A = C:A >> 1
  *  9 ADD                C:A = ext(A) + ext(C)
  * 10 SUB                C:A = ext(A) - ext(C)
- * 11 JUMP  address      C:A = PC+3; PC = address
+ * 11 JUMP  address      C:A = PC + 3; PC = address
  * 12 TEST  X,Y,Z        PC = PC + 1 + (A<0 ? sext(X)
  *                                          : (A=0 ? sext(Y)
  *                                                 : sext(Z)))
@@ -70,10 +70,13 @@ uint8_t program[] = {
     39, 72, 101, 108, 108, 111, 32, 87, 111, 114, 108, 100, 46, 10, 0
 };
 
+uint64_t cycles = 0;
+
 uint8_t rd (uint16_t a)
 {
+    ++cycles;
+    
     if (a < 0xF000) {
-	//printf("L %4.4x : %2.2x\n", a, mem[a]);
 	return mem[a];
     }
     if (a < 0xFF00) return rom[a - 0xFF00];
@@ -86,9 +89,10 @@ uint8_t rd (uint16_t a)
 
 void wr (uint16_t a, uint8_t b)
 {
+    ++cycles;
+    
     if (a < 0xF000) {
 	mem[a] = b;
-	//printf("S %4.4x <- %2.2x\n", a, b);
 	return;
     }
     
@@ -103,8 +107,8 @@ void wr (uint16_t a, uint8_t b)
 void reset (void)
 {
     ac.w = 0;
-    pc.b[0] = mem[0xFEFE];
-    pc.b[1] = mem[0xFEFF];
+    pc.b[0] = rd(0xFEFE);
+    pc.b[1] = rd(0xFEFF);
 }
 
 //#define DBG 500
@@ -117,25 +121,25 @@ void execute (void)
 #endif    
     while (1) {
 
-	opcode = mem[pc.w++];
+	opcode = rd(pc.w++);
 #ifdef DBG	
 	printf("%4d ", pc.w-1);
 #endif	
         switch (opcode) {
         case 0:                                      /* E */
-	    printf("End at pc = %d\n", pc.w-1);
+	    printf("End at pc = %d   Total # cycles = %llu\n", pc.w-1, cycles);
             return;
         case 1:                                      /* L */
-            tm.b[0] = mem[pc.w++];
-            tm.b[1] = mem[pc.w++];
+            tm.b[0] = rd(pc.w++);
+            tm.b[1] = rd(pc.w++);
 	    ac.b[0] = rd(tm.w);
 #ifdef DBG
 	    printf("L    %5d (%2.2x/%3d) ", tm.w, ac.b[0], ac.b[0]);
 #endif
 	    break;
         case 2:                                      /* S */
-            tm.b[0] = mem[pc.w++];
-            tm.b[1] = mem[pc.w++];
+            tm.b[0] = rd(pc.w++);
+            tm.b[1] = rd(pc.w++);
 	    wr(tm.w, ac.b[0]);
 #ifdef DBG
 	    printf("S    %5d (%2.2x/%3d) ", tm.w, ac.b[0], ac.b[0]);
@@ -195,8 +199,8 @@ void execute (void)
 #endif
             break;
         case 11:                                     /* J */
-            tm.b[0] = mem[pc.w++];
-            tm.b[1] = mem[pc.w++];
+            tm.b[0] = rd(pc.w++);
+            tm.b[1] = rd(pc.w++);
 	    ac.w = pc.w;
             pc.w = tm.w;
 #ifdef DBG
@@ -205,11 +209,11 @@ void execute (void)
             break;
         case 12:                                     /* TST */
 	    if (((int16_t)SEXT(ac.b[0])) < 0)
-                tm.w = SEXT(mem[pc.w+0]);
+                tm.w = SEXT(rd(pc.w+0));
             else if (((int16_t)SEXT(ac.b[0])) > 0)
-                tm.w = SEXT(mem[pc.w+2]);
+                tm.w = SEXT(rd(pc.w+2));
             else
-                tm.w = SEXT(mem[pc.w+1]);
+                tm.w = SEXT(rd(pc.w+1));
             pc.w += tm.w;
 #ifdef DBG
 	    printf("TEST  %4.4x          ", SEXT(ac.b[0]));
@@ -315,11 +319,6 @@ int options (int argc, char **argv)
 			    sz, argv[prog], proglen);
 		    prog = 0;
 		}
-		/*
-		for (size_t i = 0; i < sz; ++i) {
-		    printf("%lu: %d\n", i, mem[i]);
-		}
-		*/
 	    }
 	}
 	else {

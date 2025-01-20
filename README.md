@@ -72,10 +72,10 @@ Opcode	      Mnemonic
 				is similarly used as an offset to adjust PC.
 				If A is greater than zero, then byte 'o3' is
 				used as an offset to adject PC.
-
+```
 The instructions and their operation is briefly recapitulated below using
 C language notation:
-
+```
   ext(unsigned_byte) is defined: ((uint16_t)unsigned_byte)
   sext(unsigned_byte) is defined: ((uint16_t)(int16_t)(int8_t)unsigned_byte)
  

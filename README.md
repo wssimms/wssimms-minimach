@@ -27,13 +27,13 @@ Opcode	      Mnemonic
 				of C are replaced with the complement of
 				the bitwise AND of A and C
 				
-5	      OR  address	The contents of A are replaced with the
+5	      OR   address	The contents of A are replaced with the
 	      			bitwise OR of A and the byte loaded from
 				the specified memory address. The contents
 				of C are replaced with the complement of
 				the bitwise OR of A and C
 				
--6-	     -EOR-		-To be removed-
+~6 	      EOR 		 To be removed~
 				
 7	      SHL		The contents of C and A are shifted left one
 	      			bit position. The high bit of A is shifted
@@ -84,13 +84,13 @@ C language notation:
   1    L     address      A = read(address)
   2    S     address      write(address, A)
   3    SWAP               swaps A and C
-  4    AND                A = A & C; C = ~(A & C)
-  5    OR                 A = A | C; C = ~(A | C)
-  6    EOR                A = A ^ C; C = ~(A ^ C)
+  4    AND   address      b = read(address); A = A & b; C = ~(A & b)
+  5    OR    address      b = read(address); A = A | b; C = ~(A | b)
+  6    ~EOR               A = A ^ C; C = ~(A ^ C)~
   7    SHL                C:A = C:A << 1
   8    SHR                C:A = C:A >> 1
-  9    ADD                C:A = ext(A) + ext(C)
- 10    SUB                C:A = ext(A) - ext(C)
+  9    ADD   address      b = read(address); C:A = ext(A) + ext(b)
+ 10    SUB   address      b = read(address); C:A = ext(A) - ext(b)
  11    JUMP  address      C:A = PC + 3; PC = address
  12    TEST  X,Y,Z        PC = PC + 1 + (A<0 ? sext(X)
                                              : (A=0 ? sext(Y)

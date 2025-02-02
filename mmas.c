@@ -35,7 +35,7 @@ int oldtoken;
 int oldtokval;
 
 int tokval;
-
+int exprsz;
 
 #define STRMAX 1024
 char strbuf[STRMAX];
@@ -53,6 +53,7 @@ struct symbol {
 unsigned nsyms = 0;
 struct symbol symtab[SYMTABMAX];
 char symdef[SYMTABMAX];
+char symsz[SYMTABMAX];
 
 //#define TEXTOUT
 
@@ -418,6 +419,7 @@ int scan (void)
 	if (c == ')') return c;
 	if (c == '<') return c;
 	if (c == '>') return c;
+	if (c == '@') return c;
 
 	error("Bad character in input.");
     }
@@ -495,14 +497,20 @@ int unary (int *value)
 
     case '<':
 	result = term(value);
-	if (result == 0)
+	if (result == 0) {
 	    *value = *value % 256;
+	}
 	return result;
 	
     case '>':
 	result = term(value);
-	if (result == 0)
+	if (result == 0) {
 	    *value = (*value / 256) % 256;
+	}
+	return result;
+	
+    case '@':
+	result = term(value);
 	return result;
 	
     default:
@@ -680,17 +688,25 @@ void line (void)
 	switch (token) {
 	case '.':
 	case '!':
-	case '<':
-	case '>':
 	case '+':
 	case '-':
+	case '<':
+	case '>':
+	case '@':
 	case TNUM:
 	case TSYM:
+	    exprsz = 1;
+	    if (token == '@') exprsz = 2;
 	    pushtok(token);
 	    result = expression(&value);
 	    if (result < 0) return;
-	    ++dot;
-	    if (pass > 0) emit(value);
+	    dot += exprsz;
+	    if (pass > 0) {
+		emit(value);
+		if (exprsz == 2) {
+		    emit(value/256);
+		}
+	    }
 	    break;
 	
 	case TSTR:

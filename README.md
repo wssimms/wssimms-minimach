@@ -159,9 +159,14 @@ Each of the comma-separated items produces one byte in the output file. Each is 
 ```
 Expressions of this type may also be used as operands to the load, store, jump, and test instructions.
 
-A 16-bit value may be included in the program by placing each of its constituent bytes in the file, in little endian order, like so:
+The high or low bytes of a 16-bit value may be included in the program using the < and > unary operators, like so:
 ```
-<12345,>12345
+<0x1C9A        ;yields 9A
+>0x1C9A        ;yields 1C
+```
+A 16-bit value may be included in the program using the @ unary operator. The constituent bytes will be placed in the output file, in little endian order, like so:
+```
+@0xDA30        ;yields the byte sequence 30 DA
 ```
 Character data may be included in the program inside double quotes like so:
 ```

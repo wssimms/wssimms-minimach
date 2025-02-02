@@ -107,70 +107,11 @@ pch:	S	outloc		;print the non-null character
 	S	ckb+2
 	JUMP	ckb
 eputs:	JUMP	0		;return to caller
-
 	
-	;; decrement the stack pointer
-;; dsp:
-;; 	S	edsp+1
-;; 	SWAP
-;; 	S	edsp+2		;save the return address
-;; 	L	one
-;; 	SWAP
-;; 	L	sp
-;; 	SUB
-;; 	S	sp
-;; 	L	sp+1
-;; 	ADD
-;; 	S	sp+1
-;; edsp:	JUMP	0		;return to caller
-
-
-;; 	;; increment the stack pointer
-;; isp:
-;; 	S	eisp+1
-;; 	SWAP
-;; 	S	eisp+2		;save the return address
-;; 	L	one
-;; 	SWAP
-;; 	L	sp
-;; 	ADD
-;; 	S	sp
-;; 	L	sp+1
-;; 	ADD
-;; 	S	sp+1
-;; eisp:	JUMP	0		;return to caller
-	
-
-;; puts:
-;; 	;; output a string, a ptr to which is on the stack
-;; 	S	eputs+1
-;; 	SWAP
-;; 	S	eputs+2		;save the return address
-;; 	JUMP	pow		;pop the ptr from the stack
-;; 	L	stkw
-;; 	S	ckb+1
-;; 	L	stkw+1
-;; 	S	ckb+2
-;; ckb:	L	0		;get character
-;; 	TEST	pch,eputs,pch
-;; pch:	S	outloc		;print the non-null character
-;; 	;; increment the pointer
-;; 	L	one
-;; 	SWAP
-;; 	L	ckb+1
-;; 	ADD
-;; 	S	ckb+1
-;; 	L	ckb+2
-;; 	ADD
-;; 	S	ckb+2
-;; 	JUMP	ckb
-;; eputs:	JUMP	0		;return to caller
-
-	
-msg:	"Hello world.\n"
 zero:	0
-pmsg:	<msg,>msg
 one:	1
 two:	2
 
-sp:	<ramtop,>ramtop
+msg:	"Hello world.\n",0
+pmsg:	@msg
+sp:	@ramtop

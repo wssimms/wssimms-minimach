@@ -345,7 +345,7 @@ adig1:	S	0		;store byte to (dptr)
 	S	dptr+1
 adig2:	JUMP	0		;return to caller
 	
-dptr:	<dbuf,>dbuf		;ptr to top of digit stack
+dptr:	@dbuf			;ptr to top of digit stack
 dbuf:	.=.+6			;digit stack
 ddig:	.=.+1			;digit to push, or popped digit
 
@@ -547,13 +547,13 @@ space:	' '
 
 intro:	"Here are the primes <= ",0
 total:	"Number of primes is ",0
-pintro:	<intro,>intro
-ptotal:	<total,>total
+pintro:	@intro
+ptotal:	@total
 
-pcnt:	1,0
-tnum:	<3,>3			;start checking with 3
-enum:	<MAXVAL,>MAXVAL		;end checking with MAXVAL
-nptr:	<(pvec+2),>(pvec+2)	;points to where the next prime will go.
-cptr:	<pvec,>pvec		;points to the current prime being checked
-pptr:	<pvec,>pvec		;points to the start of pvec
-pvec:	2,0			;primes will go here
+pcnt:	@1
+tnum:	@3			;start checking with 3
+enum:	@MAXVAL			;end checking with MAXVAL
+nptr:	@(pvec+2)		;points to where the next prime will go.
+cptr:	@pvec			;points to the current prime being checked
+pptr:	@pvec			;points to the start of pvec
+pvec:	@2			;primes will go here

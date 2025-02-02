@@ -14,13 +14,12 @@
 #define TSW  303
 #define TAND 304
 #define TOR  305
-#define TEOR 306
-#define TSHL 307
-#define TSHR 308
-#define TADD 309
-#define TSUB 310
-#define TJ   311
-#define TTST 312
+#define TSHL 306
+#define TSHR 307
+#define TADD 308
+#define TSUB 309
+#define TJ   310
+#define TTST 311
 
 #define TERR 400
 
@@ -132,13 +131,12 @@ void initsymtab (void)
     initsym("SWAP", TSW,  3);
     initsym("AND",  TAND, 4);
     initsym("OR",   TOR,  5);
-    initsym("EOR",  TEOR, 6);
-    initsym("SHL",  TSHL, 7);
-    initsym("SHR",  TSHR, 8);
-    initsym("ADD",  TADD, 9);
-    initsym("SUB",  TSUB, 10);
-    initsym("JUMP", TJ,   11);
-    initsym("TEST", TTST, 12);
+    initsym("SHL",  TSHL, 6);
+    initsym("SHR",  TSHR, 7);
+    initsym("ADD",  TADD, 8);
+    initsym("SUB",  TSUB, 9);
+    initsym("JUMP", TJ,   10);
+    initsym("TEST", TTST, 11);
 }
 
 void stringize (uint64_t n, char *s)
@@ -704,7 +702,6 @@ void line (void)
 	
 	case TE:
 	case TSW:
-	case TEOR:
 	case TSHL:
 	case TSHR:
 	    ++dot;
@@ -712,32 +709,12 @@ void line (void)
 	    //outtoken(token);
 	    return;
 	
+	case TL:
+	case TS:
 	case TAND:
 	case TOR:
 	case TADD:
 	case TSUB:
-	  opcode = symtab[tokval].value;
-	  token = scan();
-	  pushtok(token);
-	  if (token == '\n' || token == EOF) {
-	      ++dot;
-	      if (pass > 0) emit(opcode);
-	      //outtoken(token);
-	  }
-	  else {
-	      result = expression(&value);
-	      if (result < 0) return;
-	      dot += 3;
-	      if (pass > 0) {
-		  emit(opcode+10);
-		  emit(value % 256);
-		  emit(value / 256);
-	      }
-	  }
-	  return;
-	  
-	case TL:
-	case TS:
 	case TJ:
 	    opcode = symtab[tokval].value;
 	    result = expression(&value);
@@ -977,7 +954,6 @@ void outtoken (int token)
     case TSW:  fprintf(outf, "<SWAP>"); break;
     case TAND: fprintf(outf, "<AND>");  break;
     case TOR:  fprintf(outf, "<OR>");   break;
-    case TEOR: fprintf(outf, "<EOR>");  break;
     case TSHL: fprintf(outf, "<SHL>");  break;
     case TSHR: fprintf(outf, "<SHR>");  break;
     case TADD: fprintf(outf, "<ADD>");  break;

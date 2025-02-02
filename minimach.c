@@ -305,60 +305,60 @@ void execute (void)
 	    printf("SWAP                ");
 #endif
             break;
-	    /**/
-        case 4:                                      // AND
-            ac.b[0] = ac.b[0] & ac.b[1];
+
+        case 4:                                      /* AND abs */
+            tm.b[0] = rd(pc.w++);
+            tm.b[1] = rd(pc.w++);
+            ac.b[0] = ac.b[0] & rd(tm.w);
             ac.b[1] = ~(ac.b[0]);
 #ifdef DBG
-	    printf("AND                 ");
+	    printf("AND  %5d          ", tm.w);
 #endif
-            break;
+	    break;
 	    
-        case 5:                                      // OR
-            ac.b[0] = ac.b[0] | ac.b[1];
+        case 5:                                      /* OR abs  */
+            tm.b[0] = rd(pc.w++);
+            tm.b[1] = rd(pc.w++);
+            ac.b[0] = ac.b[0] | rd(tm.w);
             ac.b[1] = ~(ac.b[0]);
 #ifdef DBG
-	    printf("OR                  ");
+	    printf("OR   %5d          ", tm.w);
 #endif
-            break;
-	    
-        case 6:                                      // EOR
-            ac.b[0] = ac.b[0] ^ ac.b[1];
-            ac.b[1] = ~(ac.b[0]);
-#ifdef DBG
-	    printf("EOR                 ");
-#endif
-            break;
-	    /**/
-        case 7:                                      /* SHL */
+	    break;
+
+        case 6:                                      /* SHL */
             ac.w <<= 1;
 #ifdef DBG
 	    printf("SHL                 ");
 #endif
             break;
 	    
-        case 8:                                      /* SHR */
+        case 7:                                      /* SHR */
 	    ac.w >>= 1;
 #ifdef DBG
 	    printf("SHR                 ");
 #endif
             break;
-	    /**/
-        case 9:                                      // ADD
-	    ac.w = EXT(ac.b[0]) + EXT(ac.b[1]);
+
+        case 8:                                      /* ADD abs */
+            tm.b[0] = rd(pc.w++);
+            tm.b[1] = rd(pc.w++);
+	    ac.w = EXT(ac.b[0]) + EXT(rd(tm.w));
 #ifdef DBG
-	    printf("ADD                 ");
+	    printf("ADD  %5d          ", tm.w);
 #endif
-            break;
+	    break;
 	    
-        case 10:                                     // SUB
-            ac.w = EXT(ac.b[0]) - EXT(ac.b[1]);
+        case 9:                                      /* SUB abs */
+            tm.b[0] = rd(pc.w++);
+            tm.b[1] = rd(pc.w++);
+	    ac.w = EXT(ac.b[0]) - EXT(rd(tm.w));
 #ifdef DBG
-	    printf("SUB                 ");
+	    printf("SUB  %5d          ", tm.w);
 #endif
-            break;
-	    /**/
-        case 11:                                     /* J */
+	    break;
+	    
+        case 10:                                     /* J */
             tm.b[0] = rd(pc.w++);
             tm.b[1] = rd(pc.w++);
 	    ac.w = pc.w;
@@ -368,7 +368,7 @@ void execute (void)
 #endif
             break;
 	    
-        case 12:                                     /* TST */
+        case 11:                                     /* TST */
 	    if (((int16_t)SEXT(ac.b[0])) < 0)
                 tm.w = SEXT(rd(pc.w+0));
             else if (((int16_t)SEXT(ac.b[0])) > 0)
@@ -380,44 +380,6 @@ void execute (void)
 	    printf("TEST  %4.4x          ", SEXT(ac.b[0]));
 #endif
             break;
-	    
-        case 14:                                     /* AND abs */
-            tm.b[0] = rd(pc.w++);
-            tm.b[1] = rd(pc.w++);
-            ac.b[0] = ac.b[0] & rd(tm.w);
-            ac.b[1] = ~(ac.b[0]);
-#ifdef DBG
-	    printf("AND  %5d          ", tm.w);
-#endif
-	    break;
-	    
-        case 15:                                     /* OR abs  */
-            tm.b[0] = rd(pc.w++);
-            tm.b[1] = rd(pc.w++);
-            ac.b[0] = ac.b[0] | rd(tm.w);
-            ac.b[1] = ~(ac.b[0]);
-#ifdef DBG
-	    printf("OR   %5d          ", tm.w);
-#endif
-	    break;
-	    
-        case 19:                                     /* ADD abs */
-            tm.b[0] = rd(pc.w++);
-            tm.b[1] = rd(pc.w++);
-	    ac.w = EXT(ac.b[0]) + EXT(rd(tm.w));
-#ifdef DBG
-	    printf("ADD  %5d          ", tm.w);
-#endif
-	    break;
-	    
-        case 20:                                     /* SUB abs */
-            tm.b[0] = rd(pc.w++);
-            tm.b[1] = rd(pc.w++);
-	    ac.w = EXT(ac.b[0]) - EXT(rd(tm.w));
-#ifdef DBG
-	    printf("SUB  %5d          ", tm.w);
-#endif
-	    break;
 	    
         default:
 #ifdef DBG

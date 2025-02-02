@@ -33,38 +33,36 @@ Opcode	      Mnemonic
 				of C are replaced with the complement of
 				the bitwise OR of A and C
 				
-~6 	      EOR 		 To be removed~
-				
-7	      SHL		The contents of C and A are shifted left one
+6	      SHL		The contents of C and A are shifted left one
 	      			bit position. The high bit of A is shifted
 				into the low bit of C. The low bit of A is
 				replaced with a zero.
 				
-8	      SHR		The contents of C and A are shifted right one
+7	      SHR		The contents of C and A are shifted right one
 	      			bit position. The low bit of C is shifted
 				into the high bit of A. The high bit of C is
 				replaced with a zero.
 				
-9	      ADD  address	The contents of A and the memory byte loaded
+8	      ADD  address	The contents of A and the memory byte loaded
 				from the specified address are treated as
 	      			unsigned quantities, extended to 16 bits,
 				and added. The high byte of the 16-bit result
 				is placed in C. The low byte of the 16-bit
 				result is placed in A.
 				
-10	      SUB  address	The contents of A and and the memory byte loaded
+9	      SUB  address	The contents of A and and the memory byte loaded
 				from the specified address are treated as
 	      			unsigned quantities, extended to 16 bits,
 				and C is subtracted from A. The high byte of
 				the 16-bit result is placed in C. The low byte
 				of the 16-bit result is placed in A.
 
-11 lo hi      JUMP address	The high byte of the PC is placed into C. The
+10 lo hi      JUMP address	The high byte of the PC is placed into C. The
       	      	   		low byte of the PC is placed in A. Then the
 				contents of the PC are replaced by the operand
 				address.
 
-12 o1 o2 o3   TEST t1,t2,t3	If A, treated as a signed quantity, is less
+11 o1 o2 o3   TEST t1,t2,t3	If A, treated as a signed quantity, is less
       	      	   		than zero, then the first byte after the
 				the opcode (o1), treated as a signed quantity,
 				is extended to 16 bits and added to the address
@@ -86,13 +84,12 @@ C language notation:
   3    SWAP               swaps A and C
   4    AND   address      b = read(address); A = A & b; C = ~(A & b)
   5    OR    address      b = read(address); A = A | b; C = ~(A | b)
-  6    ~EOR               A = A ^ C; C = ~(A ^ C)~
-  7    SHL                C:A = C:A << 1
-  8    SHR                C:A = C:A >> 1
-  9    ADD   address      b = read(address); C:A = ext(A) + ext(b)
- 10    SUB   address      b = read(address); C:A = ext(A) - ext(b)
- 11    JUMP  address      C:A = PC + 3; PC = address
- 12    TEST  X,Y,Z        PC = PC + 1 + (A<0 ? sext(X)
+  6    SHL                C:A = C:A << 1
+  7    SHR                C:A = C:A >> 1
+  8    ADD   address      b = read(address); C:A = ext(A) + ext(b)
+  9    SUB   address      b = read(address); C:A = ext(A) - ext(b)
+ 10    JUMP  address      C:A = PC + 3; PC = address
+ 11    TEST  X,Y,Z        PC = PC + 1 + (A<0 ? sext(X)
                                              : (A=0 ? sext(Y)
                                                     : sext(Z)))
 ```

@@ -21,20 +21,19 @@ Opcode	      Mnemonic
 
 3    	      SWAP 		Exchanges the contents of A and C
 
-4	      AND		The contents of A are replaced with the
-	      			bitwise AND of A and C. The contents of C
-				are replaced with the complement of the
-				bitwise AND of A and C
+4	      AND  address	The contents of A are replaced with the
+	      			bitwise AND of A and the byte loaded from
+				the specified memory address. The contents
+				of C are replaced with the complement of
+				the bitwise AND of A and C
 				
-5	      OR		The contents of A are replaced with the
-	      			bitwise OR of A and C. The contents of C
-				are replaced with the complement of the
-				bitwise OR of A and C
+5	      OR  address	The contents of A are replaced with the
+	      			bitwise OR of A and the byte loaded from
+				the specified memory address. The contents
+				of C are replaced with the complement of
+				the bitwise OR of A and C
 				
-6	      EOR		The contents of A are replaced with the
-	      			bitwise EXCLUSIVE OR of A and C. The contents
-				of C are replaced with the complement of the
-				bitwise EXCLUSIVE OF of A and C
+-6-	     -EOR-		-To be removed-
 				
 7	      SHL		The contents of C and A are shifted left one
 	      			bit position. The high bit of A is shifted
@@ -46,13 +45,15 @@ Opcode	      Mnemonic
 				into the high bit of A. The high bit of C is
 				replaced with a zero.
 				
-9	      ADD		The contents of A and C are treated as
+9	      ADD  address	The contents of A and the memory byte loaded
+				from the specified address are treated as
 	      			unsigned quantities, extended to 16 bits,
 				and added. The high byte of the 16-bit result
 				is placed in C. The low byte of the 16-bit
 				result is placed in A.
 				
-10	      SUB		The contents of A and C are treated as
+10	      SUB  address	The contents of A and and the memory byte loaded
+				from the specified address are treated as
 	      			unsigned quantities, extended to 16 bits,
 				and C is subtracted from A. The high byte of
 				the 16-bit result is placed in C. The low byte

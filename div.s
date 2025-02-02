@@ -75,16 +75,12 @@ cknum2:
 	;; hi byte of the prime != 0, then no need to check further
 	L	dsor+1
 	TEST	cknum5,.+4,cknum5 ;cknum5 is the label for "it's prime"
-	L	sqrtm
-	SWAP
 	L	dsor
-	SUB
+	SUB	sqrtm
 	TEST	.+4,.+4,cknum5
 	JUMP	udiv		;divide tnum by prime
 	L	urem
-	SWAP
-	L	urem+1
-	OR			;check for 0 remainder
+	OR	urem+1		;check for 0 remainder
 	TEST	cknum0,cknumB,cknum0
 cknumB:
 	;; this is the bottom of the outermost loop. Here we increment tnum,
@@ -92,26 +88,20 @@ cknumB:
 	;; program. Otherwise go back to the top of the outermost loop to
 	;; check the newly incremented value of tnum for primeness.
 	L	c2
-	SWAP
-	L	tnum
-	ADD
+	ADD	tnum
 	S	tnum
-	L	tnum+1
-	ADD			;add carry, if any
+	SWAP
+	ADD	tnum+1		;add carry, if any
 	S	tnum+1		;increment tnum
 	;; check to see if finished
-	L	tnum+1
-	SWAP
 	L	enum+1
-	SUB
+	SUB	tnum+1
 	SWAP			;check borrow
 	TEST	cknum3,.+4,.+4  ;enum < tnum => finished
 	SWAP			;check result
 	TEST	cknum4,.+4,cknum4 ; enum != tnum => next tnum
-	L	tnum
-	SWAP
 	L	enum
-	SUB
+	SUB	tnum
 	SWAP			;check borrow
 	TEST	cknum3,cknum4,cknum4	;enum < tnum => finished
 cknum3:	
@@ -137,12 +127,10 @@ cknum5:
 	JUMP	pdec		;print the prime
 	;; count the prime
 	L	c1
-	SWAP
-	L	pcnt
-	ADD
+	ADD	pcnt
 	S	pcnt
-	L	pcnt+1
-	ADD
+	SWAP
+	ADD	pcnt+1
 	S	pcnt+1
 	;; now put the new prime into pvec
 	L	cptr
@@ -189,12 +177,10 @@ icptr:
 	SWAP
 	S	icptr1+2	;save return address
 	L	c1		;1
-	SWAP
-	L	cptr
-	ADD
+	ADD	cptr
 	S	cptr
-	L	cptr+1
-	ADD			;add carry, if any
+	SWAP
+	ADD	cptr+1		;add carry, if any
 	S	cptr+1
 icptr1:	JUMP	0
 	
@@ -214,12 +200,10 @@ puts0:
 	S	outloc		;print the non-null character
 	;; increment the pointer
 	L	c1		;1
-	SWAP
-	L	puts0+1
-	ADD
+	ADD	puts0+1
 	S	puts0+1
-	L	puts0+2
-	ADD
+	SWAP
+	ADD	puts0+2
 	S	puts0+2
 	JUMP	puts0
 puts1:	JUMP	0		;return to caller
@@ -242,9 +226,7 @@ phex:
 	S	hdig
 	JUMP	phdig
 	L	c15
-	SWAP
-	L	decv+1
-	AND
+	AND	decv+1
 	S	hdig
 	JUMP	phdig
 	L	c0
@@ -257,9 +239,7 @@ phex:
 	S	hdig
 	JUMP	phdig
 	L	c15
-	SWAP
-	L	decv
-	AND
+	AND	decv
 	S	hdig
 	JUMP	phdig
 phex1:
@@ -270,25 +250,17 @@ phdig:
 	S	phdig2+1
 	SWAP
 	S	phdig2+2	;store return address
-	L	hdig
-	SWAP
 	L	c10
-	SUB
+	SUB	hdig
 	TEST	.+4,.+4,phdig1
 	L	hdig
-	SWAP
-	L	zero
-	ADD
-	SWAP
-	L	c7
-	ADD
+	ADD	zero		;+'0'
+	ADD	c7
 	S	outloc
 	JUMP	phdig2
 phdig1:
 	L	hdig
-	SWAP
-	L	zero
-	ADD
+	ADD	zero
 	S	outloc
 phdig2:
 	JUMP	0
@@ -314,15 +286,11 @@ pdec1:	L	decv
 	S	dsor+1		;store the divisor (10)
 	JUMP	udiv		;divide
 	L	urem
-	SWAP
-	L	zero		;'0'
-	ADD
+	ADD	zero		;+ '0'
 	S	ddig
 	JUMP	adig		;push the digit
 	L	uquo
-	SWAP
-	L	uquo+1
-	OR			;quotient == zero ?
+	OR	uquo+1		;quotient == zero ?
 	TEST	pdec2,pdec3,pdec2
 	;; Here the quotient is not zero, make more digits
 pdec2:	L	uquo
@@ -346,17 +314,13 @@ rdig:
 	S	rdig2+1
 	SWAP
 	S	rdig2+2		;save return address
-	L	c1		;1
-	SWAP
-	L	dptr
-	SUB			;decrement dptr
+	L	dptr		;1
+	SUB	c1		;decrement dptr
 	S	dptr
-	L	dptr+1
-	ADD
-	S	dptr+1
-	L	dptr
 	S	rdig1+1
-	L	dptr+1
+	SWAP			;borrow in A
+	ADD	dptr+1		;borrow from dptr+1, if necessary
+	S	dptr+1
 	S	rdig1+2
 rdig1:	L	0		;get byte at (dptr)
 	S	ddig
@@ -373,13 +337,11 @@ adig:
 	S	adig1+2
 	L	ddig
 adig1:	S	0		;store byte to (dptr)
-	L	c1		;1
-	SWAP
-	L	dptr
-	ADD			;increment dptr
+	L	dptr		;1
+	ADD	c1		;increment dptr
 	S	dptr
-	L	dptr+1
-	ADD
+	SWAP
+	ADD	dptr+1
 	S	dptr+1
 adig2:	JUMP	0		;return to caller
 	
@@ -393,18 +355,15 @@ udiv:
 	SWAP
 	S	udiv10+2	;save return address
 	L	dsor+1
-	TEST	udiv4,udiv0,udiv4
-udiv0:	L	dsor
-	TEST	udiv2,udiv1,udiv2
-udiv1:	L	c1
+	TEST	udiv4,.+4,udiv4
+	L	dsor
+	TEST	udiv2,.+4,udiv2
+	L	c1
 	S	divz		;indicate divide by zero
 	JUMP	udiv10		;return to caller
-udiv2:	SWAP			;lo byte of divisor in C
-	L	c1
-	SUB			;C:A = 1 - divisor lo
-	OR
-	TEST	udiv4,udiv3,udiv4
-udiv3:	;; here the divisor was 1
+udiv2:	SUB	c1		;compare divisor to 1
+	TEST	udiv4,.+4,udiv4
+	;; here the divisor was 1
 	L	dend
 	S	uquo
 	L	dend+1
@@ -415,31 +374,25 @@ udiv3:	;; here the divisor was 1
 	S	divz		;divisor != 0
 	JUMP	udiv10
 udiv4:	;; here we actually do the division
-	L	c0
-	S	divz		;divisor != 0
-	SWAP
 	L	c1
 	S	pquo
-	SWAP
+	L	c0
+	S	divz		;divisor != 0
 	S	pquo+1		;initialize pquo to 0x0001
 	S	uquo
 	S	uquo+1		;initialize uquo to 0x0000
 udiv5:	
-	;; double the divisor until it exceeds the dividend. this is ok
+	;; double the divisor until it is >= the dividend. this is ok
 	;; because the divisor and dividend are no more than 15 bits long
-	L	dend+1
-	SWAP
 	L	dsor+1
-	SUB			;divisor hi - dividend hi
+	SUB	dend+1		;divisor hi - dividend hi
 	SWAP			;check borrow
-	TEST	udiv6,udivA,udivA ;if borrow, divisor is less
-udivA:	SWAP			  ;otherwise check result
-	TEST	udiv7,udivB,udiv7 ;if result !=0, divisor is >= dividend
+	TEST	udiv6,.+4,.+4	;if borrow, divisor is less
+	SWAP			;otherwise check result
+	TEST	udiv7,.+4,udiv7	;if result !=0, divisor is >= dividend
 	;; check the lo byte difference
-udivB:	L	dend
-	SWAP
 	L	dsor
-	SUB			;divisor lo - dividend lo
+	SUB	dend		;divisor lo - dividend lo
 	SWAP			;check borrow
 	TEST	udiv6,udiv7,udiv7 ;if borrow, divisor <, else divisor >=
 	;; here divisor < dividend
@@ -462,19 +415,15 @@ udiv7:
 	;; halve the divisor until it is less than the dividend
 	;; this yields the largest multiple of the divisor by a power of 2
 	;; that can be subtracted from the dividend with a positive difference
-	L	dsor+1
-	SWAP
 	L	dend+1
-	SUB			;dividend hi - divisor hi
+	SUB	dsor+1		;dividend hi - divisor hi
 	SWAP			;check borrow
-	TEST	udiv8,udivC,udivC ;if borrow, divisor is greater
-udivC:	SWAP			  ;otherwise check result
-	TEST	udiv9,udivD,udiv9 ;if result !=0, dividend is >= divisor
+	TEST	udiv8,.+4,.+4	;if borrow, divisor is greater
+	SWAP			;otherwise check result
+	TEST	udiv9,.+4,udiv9 ;if result !=0, dividend is >= divisor
 	;; check the lo byte difference
-udivD:	L	dsor
-	SWAP
 	L	dend
-	SUB			;divisor lo - dividend lo
+	SUB	dsor		;dividend lo - divisor lo
 	SWAP			;check borrow
 	TEST	udiv8,udiv9,udiv9 ;if borrow, dividend <, else dividend >=
 	;; here dividend < divisor
@@ -492,33 +441,24 @@ udiv8:	L	dsor+1
 	S	pquo
 	SWAP
 	S	pquo+1		;partial quotient >>= 1
-	OR			;test for partial quotient == 0
+	OR	pquo		;test for partial quotient == 0
 	TEST	udiv7,udiv10,udiv7
 udiv9:
 	;; subtract the multiple of the divisor from the dividend and add
 	;; the corresponding power of 2 (partial quotient) to the quotient
-	L	dsor
-	SWAP
 	L	dend
-	SUB			;dividend lo - divisor lo
+	SUB	dsor		;dividend lo - divisor lo
 	S	dend
-	L	dend+1
-	ADD			;borrow from dividend hi, if necessary
 	SWAP
-	L	dsor+1
-	SWAP
-	SUB			;dividend hi - dividend lo
+	ADD	dend+1		;borrow from dividend hi, if necessary
+	SUB	dsor+1		;dividend hi - divisor lo
 	S	dend+1
-	L	uquo
-	SWAP
 	L	pquo
-	ADD			;add lo bytes of pquo and uquo
+	ADD	uquo		;add lo bytes of pquo and uquo
 	S	uquo		;save lo byte of result
-	L	uquo+1
-	ADD			;add carry, if any
 	SWAP
-	L	pquo+1
-	ADD			;add hi bytes of pquo and uquo
+	ADD	uquo+1		;add carry, if any
+	ADD	pquo+1		;add hi bytes of pquo and uquo
 	S	uquo+1
 	JUMP	udiv7
 udiv10:
@@ -547,15 +487,11 @@ sqrt0:
 	JUMP	udiv		;divide num by divisor
 	;; now find the mean of the divisor and the quotient
 	L	uquo
-	SWAP
-	L	sqrtd
-	ADD			;add lo bytes
+	ADD	sqrtd		;add lo bytes
 	S	sqrtm		;remember lo byte sum for a moment
-	L	uquo+1
-	ADD			;add carry, if any
-	SWAP
-	L	sqrtd+1
-	ADD			;add hi bytes
+	SWAP			;get carry in A
+	ADD	uquo+1		;add hi byte of quotient
+	ADD	sqrtd+1		;add hi byte of divisor
 	SWAP			;hi byte sum in C
 	L	sqrtm		;lo byte sum in A
 	SHR			;divide by 2
@@ -563,25 +499,18 @@ sqrt0:
 	SWAP
 	S	sqrtm+1		;store mean
 	;; if mean == divisor then done
-	L	sqrtd
-	SUB			;compare lo bytes of mean and divisor
+	SUB	sqrtd+1		;compare hi bytes of mean and divisor
 	TEST	sqrt1,.+4,sqrt1
-	L	sqrtm+1
-	SWAP
-	L	sqrtd+1
-	SUB			;compare hi bytes of mean and divisor
+	L	sqrtm
+	SUB	sqrtd		;compare lo bytes of mean and divisor
 	TEST	sqrt1,sqrt3,sqrt1
 sqrt1:
 	;; if mean == quotient then done
 	L	uquo
-	SWAP
-	L	sqrtm
-	SUB			;compare lo bytes of mean and quotient
+	SUB	sqrtm		;compare lo bytes of mean and quotient
 	TEST	sqrt2,.+4,sqrt2
 	L	uquo+1
-	SWAP
-	L	sqrtm+1
-	SUB			;compare hi bytes of mean and quotient
+	SUB	sqrtm+1		;compare hi bytes of mean and quotient
 	TEST	sqrt2,sqrt3,sqrt2
 sqrt2:
 	;; here we are not done, the mean is the new divisor

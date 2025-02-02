@@ -704,18 +704,38 @@ void line (void)
 	
 	case TE:
 	case TSW:
-	case TAND:
-	case TOR:
 	case TEOR:
 	case TSHL:
 	case TSHR:
-	case TADD:
-	case TSUB:
 	    ++dot;
 	    if (pass > 0) emit(symtab[tokval].value);
 	    //outtoken(token);
 	    return;
 	
+	case TAND:
+	case TOR:
+	case TADD:
+	case TSUB:
+	  opcode = symtab[tokval].value;
+	  token = scan();
+	  pushtok(token);
+	  if (token == '\n' || token == EOF) {
+	      ++dot;
+	      if (pass > 0) emit(opcode);
+	      //outtoken(token);
+	  }
+	  else {
+	      result = expression(&value);
+	      if (result < 0) return;
+	      dot += 3;
+	      if (pass > 0) {
+		  emit(opcode+10);
+		  emit(value % 256);
+		  emit(value / 256);
+	      }
+	  }
+	  return;
+	  
 	case TL:
 	case TS:
 	case TJ:
@@ -927,9 +947,7 @@ void assemble (char *fname)
     fclose(outf);
     fclose(inf);
 
-    /*
-    if (errors == 0) dumpsyms();
-    */
+    //if (errors == 0) dumpsyms();
 }
 
 //#define TESTSCAN

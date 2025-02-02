@@ -1,7 +1,7 @@
 # wssimms-minimach
 A minimal 8-bit virtual machine
 
-This is an exercise in developing a minimal (virtual) 8-bit CPU with as few instructions as possible without making things too unwieldy or inconvenient. The current version has 12 instructions used for computation, plus a stop instruction which stops the simulated CPU.
+This is an exercise in developing a minimal (virtual) 8-bit CPU with as few instructions as possible without making things too unwieldy or inconvenient. The current version has 11 instructions used for computation, plus a stop instruction which stops the simulated CPU.
 
 ## Machine Description
 

@@ -3,7 +3,7 @@
 #include <stdint.h>
 
 /*
- * Machine Description (v1.3)
+ * Machine Description (v1.4)
  *
  * PC: 16 bit program counter
  * A: 8 bit accumulator
@@ -17,21 +17,30 @@
  *  1 L     address      A = read(address)
  *  2 S     address      write(address, A)
  *  3 SWAP               swaps A and C
+ *  vvvvvv TO BE DELETED
  *  4 AND                A = A & C; C = ~(A & C)
  *  5 OR                 A = A | C; C = ~(A | C)
  *  6 EOR                A = A ^ C; C = ~(A ^ C)
+ *  ^^^^^^ TO BE DELETED
  *  7 SHL                C:A = C:A << 1
  *  8 SHR                C:A = C:A >> 1
+ *  vvvvvv TO BE DELETED
  *  9 ADD                C:A = ext(A) + ext(C)
  * 10 SUB                C:A = ext(A) - ext(C)
+ *  ^^^^^^ TO BE DELETED
  * 11 JUMP  address      C:A = PC + 3; PC = address
  * 12 TEST  X,Y,Z        PC = PC + 1 + (A<0 ? sext(X)
  *                                          : (A=0 ? sext(Y)
  *                                                 : sext(Z)))
+ * vvvvvvv TO BE MOVED TO OPCODES 4, 5
  * 14 AND   address
  * 15 OR    address
+ * ^^^^^^^ TO BE MOVED TO OPCODES 4, 5
+ *
+ * vvvvvvv TO BE MOVED TO OPCODES 9,10
  * 19 ADD   address
  * 20 SUB   address
+ * ^^^^^^^ TO BE MOVED TO OPCODES 9,10
  *
  * Memory Map
  *   0x0000 - 0xEFFF : read/write memory
@@ -296,8 +305,7 @@ void execute (void)
 	    printf("SWAP                ");
 #endif
             break;
-
-	    /*
+	    /**/
         case 4:                                      // AND
             ac.b[0] = ac.b[0] & ac.b[1];
             ac.b[1] = ~(ac.b[0]);
@@ -321,8 +329,7 @@ void execute (void)
 	    printf("EOR                 ");
 #endif
             break;
-	    */
-	    
+	    /**/
         case 7:                                      /* SHL */
             ac.w <<= 1;
 #ifdef DBG
@@ -336,7 +343,7 @@ void execute (void)
 	    printf("SHR                 ");
 #endif
             break;
-	    /*
+	    /**/
         case 9:                                      // ADD
 	    ac.w = EXT(ac.b[0]) + EXT(ac.b[1]);
 #ifdef DBG
@@ -350,7 +357,7 @@ void execute (void)
 	    printf("SUB                 ");
 #endif
             break;
-	    */
+	    /**/
         case 11:                                     /* J */
             tm.b[0] = rd(pc.w++);
             tm.b[1] = rd(pc.w++);

@@ -3,7 +3,7 @@
 #include <stdint.h>
 
 /*
- * Machine Description (v1.4)
+ * Machine Description (v1.5)
  *
  * PC: 16 bit program counter
  * A: 8 bit accumulator
@@ -17,31 +17,17 @@
  *  1 L     address      A = read(address)
  *  2 S     address      write(address, A)
  *  3 SWAP               swaps A and C
- *  vvvvvv TO BE DELETED
- *  4 AND                A = A & C; C = ~(A & C)
- *  5 OR                 A = A | C; C = ~(A | C)
- *  6 EOR                A = A ^ C; C = ~(A ^ C)
- *  ^^^^^^ TO BE DELETED
- *  7 SHL                C:A = C:A << 1
- *  8 SHR                C:A = C:A >> 1
- *  vvvvvv TO BE DELETED
- *  9 ADD                C:A = ext(A) + ext(C)
- * 10 SUB                C:A = ext(A) - ext(C)
- *  ^^^^^^ TO BE DELETED
+ *  4 AND   address      A = A & read(address); C = ~A
+ *  5 OR    address      A = A | read(address); C = ~A
+ *  6 SHL                C:A = C:A << 1
+ *  7 SHR                C:A = C:A >> 1
+ *  8 ADD   address      C:A = ext(A) + ext(read(address))
+ *  9 SUB   address      C:A = ext(A) - ext(read(address))
+ * 10 ADDS  address      C:A = sext(A) + sext(read(address))
  * 11 JUMP  address      C:A = PC + 3; PC = address
  * 12 TEST  X,Y,Z        PC = PC + 1 + (A<0 ? sext(X)
  *                                          : (A=0 ? sext(Y)
  *                                                 : sext(Z)))
- * vvvvvvv TO BE MOVED TO OPCODES 4, 5
- * 14 AND   address
- * 15 OR    address
- * ^^^^^^^ TO BE MOVED TO OPCODES 4, 5
- *
- * vvvvvvv TO BE MOVED TO OPCODES 9,10
- * 19 ADD   address
- * 20 SUB   address
- * ^^^^^^^ TO BE MOVED TO OPCODES 9,10
- *
  * Memory Map
  *   0x0000 - 0xEFFF : read/write memory
  *   0xF000 - 0xFEFF : read only memory
@@ -349,16 +335,25 @@ void execute (void)
 #endif
 	    break;
 	    
-        case 9:                                      /* SUB abs */
+        case 9:                                      /* SUB */
             tm.b[0] = rd(pc.w++);
             tm.b[1] = rd(pc.w++);
 	    ac.w = EXT(ac.b[0]) - EXT(rd(tm.w));
 #ifdef DBG
 	    printf("SUB  %5d          ", tm.w);
 #endif
+            break;
+
+        case 10:                                     /* ADDS abs */
+            tm.b[0] = rd(pc.w++);
+            tm.b[1] = rd(pc.w++);
+	    ac.w = SEXT(ac.b[0]) + SEXT(rd(tm.w));
+#ifdef DBG
+	    printf("ADDS %5d          ", tm.w);
+#endif
 	    break;
 	    
-        case 10:                                     /* J */
+        case 11:                                     /* J */
             tm.b[0] = rd(pc.w++);
             tm.b[1] = rd(pc.w++);
 	    ac.w = pc.w;
@@ -368,7 +363,7 @@ void execute (void)
 #endif
             break;
 	    
-        case 11:                                     /* TST */
+        case 12:                                     /* TST */
 	    if (((int16_t)SEXT(ac.b[0])) < 0)
                 tm.w = SEXT(rd(pc.w+0));
             else if (((int16_t)SEXT(ac.b[0])) > 0)

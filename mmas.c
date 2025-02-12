@@ -3,25 +3,26 @@
 #include <string.h>
 #include <stdlib.h>
 
-#define TNUM 200
-#define TSYM 201
-#define TLAB 202
-#define TSTR 203
+#define TNUM  200
+#define TSYM  201
+#define TLAB  202
+#define TSTR  203
 
-#define TE   300
-#define TL   301
-#define TS   302
-#define TSW  303
-#define TAND 304
-#define TOR  305
-#define TSHL 306
-#define TSHR 307
-#define TADD 308
-#define TSUB 309
-#define TJ   310
-#define TTST 311
+#define TE    300
+#define TL    301
+#define TS    302
+#define TSW   303
+#define TAND  304
+#define TOR   305
+#define TSHL  306
+#define TSHR  307
+#define TADD  308
+#define TADDS 309
+#define TSUB  310
+#define TJ    311
+#define TTST  312
 
-#define TERR 400
+#define TERR  400
 
 FILE *inf, *outf;
 
@@ -126,18 +127,19 @@ void initsym (char *id, int t, int v)
 
 void initsymtab (void)
 {
-    initsym("END",  TE,   0);
-    initsym("L",    TL,   1);
-    initsym("S",    TS,   2);
-    initsym("SWAP", TSW,  3);
-    initsym("AND",  TAND, 4);
-    initsym("OR",   TOR,  5);
-    initsym("SHL",  TSHL, 6);
-    initsym("SHR",  TSHR, 7);
-    initsym("ADD",  TADD, 8);
-    initsym("SUB",  TSUB, 9);
-    initsym("JUMP", TJ,   10);
-    initsym("TEST", TTST, 11);
+    initsym("END",  TE,    0);
+    initsym("L",    TL,    1);
+    initsym("S",    TS,    2);
+    initsym("SWAP", TSW,   3);
+    initsym("AND",  TAND,  4);
+    initsym("OR",   TOR,   5);
+    initsym("SHL",  TSHL,  6);
+    initsym("SHR",  TSHR,  7);
+    initsym("ADD",  TADD,  8);
+    initsym("SUB",  TSUB,  9);
+    initsym("ADDS", TADDS, 10);
+    initsym("JUMP", TJ,    11);
+    initsym("TEST", TTST,  12);
 }
 
 void stringize (uint64_t n, char *s)
@@ -730,6 +732,7 @@ void line (void)
 	case TAND:
 	case TOR:
 	case TADD:
+	case TADDS:
 	case TSUB:
 	case TJ:
 	    opcode = symtab[tokval].value;
@@ -964,18 +967,18 @@ void outtoken (int token)
 	fprintf(outf, "[%s]", sname);
 	break;
 	
-    case TE:   fprintf(outf, "<END>");  break;
-    case TL:   fprintf(outf, "<L>");    break;
-    case TS:   fprintf(outf, "<S>");    break;
-    case TSW:  fprintf(outf, "<SWAP>"); break;
-    case TAND: fprintf(outf, "<AND>");  break;
-    case TOR:  fprintf(outf, "<OR>");   break;
-    case TSHL: fprintf(outf, "<SHL>");  break;
-    case TSHR: fprintf(outf, "<SHR>");  break;
-    case TADD: fprintf(outf, "<ADD>");  break;
-    case TSUB: fprintf(outf, "<SUB>");  break;
-    case TJ:   fprintf(outf, "<JUMP>"); break;
-    case TTST: fprintf(outf, "<TEST>"); break;
+    case TE:    fprintf(outf, "<END>");  break;
+    case TL:    fprintf(outf, "<L>");    break;
+    case TS:    fprintf(outf, "<S>");    break;
+    case TSW:   fprintf(outf, "<SWAP>"); break;
+    case TAND:  fprintf(outf, "<AND>");  break;
+    case TOR:   fprintf(outf, "<OR>");   break;
+    case TSHL:  fprintf(outf, "<SHL>");  break;
+    case TSHR:  fprintf(outf, "<SHR>");  break;
+    case TADD:  fprintf(outf, "<ADD>");  break;
+    case TADDS: fprintf(outf, "<ADDS>"); break;
+    case TJ:    fprintf(outf, "<JUMP>"); break;
+    case TTST:  fprintf(outf, "<TEST>"); break;
 
     case '\n':
  	fprintf(outf, "$\n");

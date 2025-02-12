@@ -21,13 +21,13 @@ Opcode	      Mnemonic
 
 3    	      SWAP 		Exchanges the contents of A and C
 
-4	      AND  address	The contents of A are replaced with the
+4 lo hi	      AND  address	The contents of A are replaced with the
 	      			bitwise AND of A and the byte loaded from
 				the specified memory address. The contents
 				of C are replaced with the complement of
 				the bitwise AND of A and C
 				
-5	      OR   address	The contents of A are replaced with the
+5 lo hi	      OR   address	The contents of A are replaced with the
 	      			bitwise OR of A and the byte loaded from
 				the specified memory address. The contents
 				of C are replaced with the complement of
@@ -43,21 +43,21 @@ Opcode	      Mnemonic
 				into the high bit of A. The high bit of C is
 				replaced with a zero.
 				
-8	      ADD  address	The contents of A and the memory byte loaded
+8 lo hi	      ADD  address	The contents of A and the memory byte loaded
 				from the specified address are treated as
 	      			unsigned quantities, extended to 16 bits,
 				and added. The high byte of the 16-bit result
 				is placed in C. The low byte of the 16-bit
 				result is placed in A.
 				
-9	      SUB  address	The contents of A and and the memory byte loaded
+9 lo hi	      SUB  address	The contents of A and and the memory byte loaded
 				from the specified address are treated as
 	      			unsigned quantities, extended to 16 bits,
 				and C is subtracted from A. The high byte of
 				the 16-bit result is placed in C. The low byte
 				of the 16-bit result is placed in A.
 
-10	      ADDS address	The contents of A and the memory byte loaded
+10 lo hi      ADDS address	The contents of A and the memory byte loaded
 				from the specified address are treated as
 	      			signed quantities, extended to 16 bits,
 				and added. The high byte of the 16-bit result

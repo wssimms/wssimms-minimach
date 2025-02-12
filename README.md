@@ -1,7 +1,7 @@
 # wssimms-minimach
 A minimal 8-bit virtual machine
 
-This is an exercise in developing a minimal (virtual) 8-bit CPU with as few instructions as possible without making things too unwieldy or inconvenient. The current version has 11 instructions used for computation, plus a stop instruction which stops the simulated CPU.
+This is an exercise in developing a minimal (virtual) 8-bit CPU with as few instructions as possible without making things too unwieldy or inconvenient. The current version has 12 instructions used for computation, plus a stop instruction which stops the simulated CPU.
 
 ## Machine Description
 
@@ -57,12 +57,19 @@ Opcode	      Mnemonic
 				the 16-bit result is placed in C. The low byte
 				of the 16-bit result is placed in A.
 
-10 lo hi      JUMP address	The high byte of the PC is placed into C. The
+10	      ADDS address	The contents of A and the memory byte loaded
+				from the specified address are treated as
+	      			signed quantities, extended to 16 bits,
+				and added. The high byte of the 16-bit result
+				is placed in C. The low byte of the 16-bit
+				result is placed in A.
+				
+11 lo hi      JUMP address	The high byte of the PC is placed into C. The
       	      	   		low byte of the PC is placed in A. Then the
 				contents of the PC are replaced by the operand
 				address.
 
-11 o1 o2 o3   TEST t1,t2,t3	If A, treated as a signed quantity, is less
+12 o1 o2 o3   TEST t1,t2,t3	If A, treated as a signed quantity, is less
       	      	   		than zero, then the first byte after the
 				the opcode (o1), treated as a signed quantity,
 				is extended to 16 bits and added to the address
@@ -88,8 +95,9 @@ C language notation:
   7    SHR                C:A = C:A >> 1
   8    ADD   address      b = read(address); C:A = ext(A) + ext(b)
   9    SUB   address      b = read(address); C:A = ext(A) - ext(b)
- 10    JUMP  address      C:A = PC + 3; PC = address
- 11    TEST  X,Y,Z        PC = PC + 1 + (A<0 ? sext(X)
+ 10    ADDS  address      b = read(address); C:A = sext(A) + sext(b)
+ 11    JUMP  address      C:A = PC + 3; PC = address
+ 12    TEST  X,Y,Z        PC = PC + 1 + (A<0 ? sext(X)
                                              : (A=0 ? sext(Y)
                                                     : sext(Z)))
 ```

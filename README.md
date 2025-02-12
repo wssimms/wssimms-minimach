@@ -57,11 +57,12 @@ Opcode	      Mnemonic
 				the 16-bit result is placed in C. The low byte
 				of the 16-bit result is placed in A.
 
-10 lo hi      ADDS address	The contents of A and the memory byte loaded
-				from the specified address are treated as
-	      			signed quantities, extended to 16 bits,
-				and added. The high byte of the 16-bit result
-				is placed in C. The low byte of the 16-bit
+10 lo hi      ADDC address	The contents of C is treated as a signed quantity
+      	      	   		and extended to 16 bits. The memory byte loaded
+				from the specified address is treated as an
+	      			unsigned quantities and extended to 16 bits,
+				and the two are added. The high byte of the 16-bit
+				result is placed in C. The low byte of the 16-bit
 				result is placed in A.
 				
 11 lo hi      JUMP address	The high byte of the PC is placed into C. The
@@ -95,7 +96,7 @@ C language notation:
   7    SHR                C:A = C:A >> 1
   8    ADD   address      b = read(address); C:A = ext(A) + ext(b)
   9    SUB   address      b = read(address); C:A = ext(A) - ext(b)
- 10    ADDS  address      b = read(address); C:A = sext(A) + sext(b)
+ 10    ADDC  address      b = read(address); C:A = sext(C) + ext(b)
  11    JUMP  address      C:A = PC + 3; PC = address
  12    TEST  X,Y,Z        PC = PC + 1 + (A<0 ? sext(X)
                                              : (A=0 ? sext(Y)

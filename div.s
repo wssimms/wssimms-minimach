@@ -9,11 +9,8 @@
 ;;; prime sieve
 
 	;; print message
-	L	pintro
-	S	pmsg
-	L	pintro+1
-	S	pmsg+1
 	JUMP	puts
+	@intro
 	L	enum
 	S	decv
 	L	enum+1
@@ -90,8 +87,7 @@ cknumB:
 	L	c2
 	ADD	tnum
 	S	tnum
-	SWAP
-	ADD	tnum+1		;add carry, if any
+	ADDC	tnum+1		;add carry, if any
 	S	tnum+1		;increment tnum
 	;; check to see if finished
 	L	enum+1
@@ -129,8 +125,7 @@ cknum5:
 	L	c1
 	ADD	pcnt
 	S	pcnt
-	SWAP
-	ADD	pcnt+1
+	ADDC	pcnt+1
 	S	pcnt+1
 	;; now put the new prime into pvec
 	L	cptr
@@ -157,11 +152,8 @@ cknum7:
 done:
 	L	c10		;'\n'
 	S	outloc
-	L	ptotal
-	S	pmsg
-	L	ptotal+1
-	S	pmsg+1
 	JUMP	puts
+	@total
 	L	pcnt
 	S	decv
 	L	pcnt+1
@@ -179,43 +171,52 @@ icptr:
 	L	c1		;1
 	ADD	cptr
 	S	cptr
-	SWAP
-	ADD	cptr+1		;add carry, if any
+	ADDC	cptr+1		;add carry, if any
 	S	cptr+1
 icptr1:	JUMP	0
 	
-
+;;; output a null-terminated string
+;;; a ptr to the message is inserted after the call to puts
+;;; and puts picks it up and prints the message
+	
 puts:
-	;; output a string, a ptr to which is in variable 'pmsg'
-	S	puts1+1
+	;; output a string
+	S	stkptr
 	SWAP
-	S	puts1+2		;save the return address
-	L	pmsg
+	S	stkptr+1	;save link in stack pointer
+	;; get parameter by popping the stack
+	JUMP	popb
+	L	stkbyte
 	S	puts0+1
-	L	pmsg+1
+	JUMP	popb
+	L	stkbyte
 	S	puts0+2
+	;; save return address
+	L	stkptr
+	S	puts1+1
+	L	stkptr+1
+	S	puts1+2
 puts0:
 	L	0		;get character
 	TEST	.+4,puts1,.+4
 	S	outloc		;print the non-null character
 	;; increment the pointer
-	L	c1		;1
+	L	c1
 	ADD	puts0+1
 	S	puts0+1
 	SWAP
 	ADD	puts0+2
 	S	puts0+2
 	JUMP	puts0
-puts1:	JUMP	0		;return to caller
-
-pmsg:	.=.+2
-
+puts1:
+	JUMP	0		;return to caller
 
 	;; print a 16-bit number as 4 hexadecimal digits
 phex:
 	S	phex1+1
 	SWAP
 	S	phex1+2		;store return address
+	;; 
 	L	c0
 	SWAP
 	L	decv+1
@@ -250,17 +251,18 @@ phdig:
 	S	phdig2+1
 	SWAP
 	S	phdig2+2	;store return address
+	;; 
 	L	c10
 	SUB	hdig
 	TEST	.+4,.+4,phdig1
 	L	hdig
-	ADD	zero		;+'0'
+	ADD	czero		;+'0'
 	ADD	c7
 	S	outloc
 	JUMP	phdig2
 phdig1:
 	L	hdig
-	ADD	zero
+	ADD	czero
 	S	outloc
 phdig2:
 	JUMP	0
@@ -274,8 +276,14 @@ pdec:
 	S	pdec5+1
 	SWAP
 	S	pdec5+2		;save return address
+	;;
+	L	dptr
+	S	stkptr
+	L	dptr+1
+	S	stkptr+1
 	L	c0		;0
-	JUMP	adig		;place sentinel value of 0
+	S	stkbyte
+	JUMP	pushb		;place sentinel value of 0
 pdec1:	L	decv
 	S	dend
 	L	decv+1
@@ -286,9 +294,9 @@ pdec1:	L	decv
 	S	dsor+1		;store the divisor (10)
 	JUMP	udiv		;divide
 	L	urem
-	ADD	zero		;+ '0'
-	S	ddig
-	JUMP	adig		;push the digit
+	ADD	czero		;+ '0'
+	S	stkbyte
+	JUMP	pushb		;push the digit
 	L	uquo
 	OR	uquo+1		;quotient == zero ?
 	TEST	pdec2,pdec3,pdec2
@@ -299,61 +307,79 @@ pdec2:	L	uquo
 	S	decv+1
 	JUMP	pdec1
 	;; Here the quotient is zero, print the digits
-pdec3:	JUMP	rdig		;pop the digit
-	L	ddig
+pdec3:	JUMP	popb		;pop the digit
+	L	stkbyte
 	TEST	pdec4,pdec5,pdec4
 pdec4:	S	outloc		;print the digit
 	JUMP	pdec3		;next digit
 	;; here we popped the sentinel (0)
 pdec5:	JUMP	0		;return to caller
 
-decv:	.=.+2			;unsigned 16-bit value to print
-
-	;; pop a digit off the digit stack
-rdig:
-	S	rdig2+1
-	SWAP
-	S	rdig2+2		;save return address
-	L	dptr		;1
-	SUB	c1		;decrement dptr
-	S	dptr
-	S	rdig1+1
-	SWAP			;borrow in A
-	ADD	dptr+1		;borrow from dptr+1, if necessary
-	S	dptr+1
-	S	rdig1+2
-rdig1:	L	0		;get byte at (dptr)
-	S	ddig
-rdig2:	JUMP	0		;return to caller
-
-	;; push a digit onto the digit stack
-adig:
-	S	adig2+1
-	SWAP
-	S	adig2+2		;save return address
-	L	dptr
-	S	adig1+1
-	L	dptr+1
-	S	adig1+2
-	L	ddig
-adig1:	S	0		;store byte to (dptr)
-	L	dptr		;1
-	ADD	c1		;increment dptr
-	S	dptr
-	SWAP
-	ADD	dptr+1
-	S	dptr+1
-adig2:	JUMP	0		;return to caller
-	
-dptr:	@dbuf			;ptr to top of digit stack
+decv:	.=.+2			;unsigned 16-bit value to print	
 dbuf:	.=.+6			;digit stack
-ddig:	.=.+1			;digit to push, or popped digit
+dptr:	@dptr			;ptr to top of digit stack
 
+;;; general purpose stack implementation
+;;; The 16-bit variable 'stkptr' can be loaded with an address.
+;;; The 8-bit variable 'stkbyte' is used to supply bytes to push
+;;; when calling 'pushb' and to receive popped bytes when calling
+;;; 'popb'
+	
+	;; pop a byte from a stack
+popb:
+	S	popb0+1
+	SWAP
+	S	popb0+2		;save return address
+	;; retrieve the byte
+	L	stkptr
+	S	popptr+1
+	L	stkptr+1
+	S	popptr+2
+popptr:
+	L	0
+	S	stkbyte
+	;; increment the stack pointer
+	L	stkptr
+	ADD	c1		;increment lo byte
+	S	stkptr
+	ADDC	stkptr+1	;add carry, if necessary
+	S	stkptr+1
+popb0:
+	JUMP	0		;return to caller
+	
+	;; push a byte onto a stack
+pushb:
+	S	pushb0+1
+	SWAP
+	S	pushb0+2	;save return address
+	;; decrement stack pointer
+	L	stkptr
+	SUB	c1		;decrement lo byte
+	S	stkptr
+	S	pushptr+1
+	ADDC	stkptr+1	;borrow, if necessary
+	S	stkptr+1
+	S	pushptr+2
+	;; store the byte
+	L	stkbyte
+pushptr:
+	S	0
+pushb0:
+	JUMP	0		;return to caller
+
+	;; variables for pushb and popb
+stkptr:	.=.+2
+stkbyte:.=.+1
+
+;;; unsigned 16-bit divide
+;;; producing an unsigned 16-bit quotient and an unsigned
+;;; 16-bit remainder
 	
 udiv:
 	S	udiv10+1
 	SWAP
 	S	udiv10+2	;save return address
+	;; 
 	L	dsor+1
 	TEST	udiv4,.+4,udiv4
 	L	dsor
@@ -361,7 +387,8 @@ udiv:
 	L	c1
 	S	divz		;indicate divide by zero
 	JUMP	udiv10		;return to caller
-udiv2:	SUB	c1		;compare divisor to 1
+udiv2:
+	SUB	c1		;compare divisor to 1
 	TEST	udiv4,.+4,udiv4
 	;; here the divisor was 1
 	L	dend
@@ -449,15 +476,13 @@ udiv9:
 	L	dend
 	SUB	dsor		;dividend lo - divisor lo
 	S	dend
-	SWAP
-	ADD	dend+1		;borrow from dividend hi, if necessary
+	ADDC	dend+1		;borrow from dividend hi, if necessary
 	SUB	dsor+1		;dividend hi - divisor lo
 	S	dend+1
 	L	pquo
 	ADD	uquo		;add lo bytes of pquo and uquo
 	S	uquo		;save lo byte of result
-	SWAP
-	ADD	uquo+1		;add carry, if any
+	ADDC	uquo+1		;add carry, if any
 	ADD	pquo+1		;add hi bytes of pquo and uquo
 	S	uquo+1
 	JUMP	udiv7
@@ -471,6 +496,7 @@ sqrt:
 	S	sqrt3+1
 	SWAP
 	S	sqrt3+2		;store return address
+	;; 
 	L	c1
 	S	sqrtd
 	L	c0
@@ -489,8 +515,7 @@ sqrt0:
 	L	uquo
 	ADD	sqrtd		;add lo bytes
 	S	sqrtm		;remember lo byte sum for a moment
-	SWAP			;get carry in A
-	ADD	uquo+1		;add hi byte of quotient
+	ADDC	uquo+1		;add carry to hi byte of quotient
 	ADD	sqrtd+1		;add hi byte of divisor
 	SWAP			;hi byte sum in C
 	L	sqrtm		;lo byte sum in A
@@ -540,15 +565,13 @@ c2:	2
 c7:	7
 c10:	10
 c15:	15
-zero:	'0'
+czero:	'0'
 comma:	','
 colon:	':'
 space:	' '
 
 intro:	"Here are the primes <= ",0
 total:	"Number of primes is ",0
-pintro:	@intro
-ptotal:	@total
 
 pcnt:	@1
 tnum:	@3			;start checking with 3

@@ -23,7 +23,7 @@
  *  7 SHR                C:A = C:A >> 1
  *  8 ADD   address      C:A = ext(A) + ext(read(address))
  *  9 SUB   address      C:A = ext(A) - ext(read(address))
- * 10 ADDS  address      C:A = sext(A) + sext(read(address))
+ * 10 ADDC  address      C:A = sext(A) + ext(read(address))
  * 11 JUMP  address      C:A = PC + 3; PC = address
  * 12 TEST  X,Y,Z        PC = PC + 1 + (A<0 ? sext(X)
  *                                          : (A=0 ? sext(Y)
@@ -344,12 +344,12 @@ void execute (void)
 #endif
             break;
 
-        case 10:                                     /* ADDS abs */
+        case 10:                                     /* ADDC abs */
             tm.b[0] = rd(pc.w++);
             tm.b[1] = rd(pc.w++);
-	    ac.w = SEXT(ac.b[0]) + SEXT(rd(tm.w));
+	    ac.w = SEXT(ac.b[1]) + EXT(rd(tm.w));
 #ifdef DBG
-	    printf("ADDS %5d          ", tm.w);
+	    printf("ADDC %5d          ", tm.w);
 #endif
 	    break;
 	    

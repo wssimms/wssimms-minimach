@@ -62,13 +62,15 @@ dsp:
 	S	edsp+1
 	SWAP
 	S	edsp+2		;save the return address
+	;; 
 	L	sp
-	SUB	one
+	SUB	c1
 	S	sp
-	SWAP
-	ADD	sp+1
+	ADDC	sp+1
 	S	sp+1
-edsp:	JUMP	0		;return to caller
+	;; 
+edsp:
+	JUMP	0		;return to caller
 
 
 	;; increment the stack pointer
@@ -76,12 +78,13 @@ isp:
 	S	eisp+1
 	SWAP
 	S	eisp+2		;save the return address
+	;; 
 	L	sp
 	ADD	sp
 	S	sp
-	SWAP
-	ADD	sp+1
+	ADDC	sp+1
 	S	sp+1
+	;; 
 eisp:	JUMP	0		;return to caller
 	
 
@@ -90,6 +93,7 @@ puts:
 	S	eputs+1
 	SWAP
 	S	eputs+2		;save the return address
+	;; 
 	JUMP	pow		;pop the ptr from the stack
 	L	stkw
 	S	ckb+1
@@ -100,17 +104,14 @@ ckb:	L	0		;get character
 pch:	S	outloc		;print the non-null character
 	;; increment the pointer
 	L	ckb+1
-	ADD	one
+	ADD	c1
 	S	ckb+1
-	SWAP
-	ADD	ckb+2
+	ADDC	ckb+2
 	S	ckb+2
 	JUMP	ckb
 eputs:	JUMP	0		;return to caller
 	
-zero:	0
-one:	1
-two:	2
+c1:	1
 
 msg:	"Hello world.\n",0
 pmsg:	@msg

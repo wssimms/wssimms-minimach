@@ -21,11 +21,10 @@
  *  5 OR    address      A = A | read(address); C = ~A
  *  6 SHL                C:A = C:A << 1
  *  7 SHR                C:A = C:A >> 1
- *  8 ADD   address      C:A = ext(A) + ext(read(address))
- *  9 SUB   address      C:A = ext(A) - ext(read(address))
- * 10 ADDC  address      C:A = sext(A) + ext(read(address))
- * 11 JUMP  address      C:A = PC + 3; PC = address
- * 12 TEST  X,Y,Z        PC = PC + 1 + (A<0 ? sext(X)
+ *  8 ADDC  address      C:A = sext(C) + ext(A) + ext(read(address))
+ *  9 SUBC  address      C:A = sext(C) + ext(A) - ext(read(address))
+ * 10 JUMP  address      C:A = PC + 3; PC = address
+ * 11 TEST  X,Y,Z        PC = PC + 1 + (A<0 ? sext(X)
  *                                          : (A=0 ? sext(Y)
  *                                                 : sext(Z)))
  * Memory Map
@@ -329,31 +328,22 @@ void execute (void)
         case 8:                                      /* ADD abs */
             tm.b[0] = rd(pc.w++);
             tm.b[1] = rd(pc.w++);
-	    ac.w = EXT(ac.b[0]) + EXT(rd(tm.w));
+	    ac.w = SEXT(ac.b[1]) + EXT(ac.b[0]) + EXT(rd(tm.w));
 #ifdef DBG
-	    printf("ADD  %5d          ", tm.w);
+	    printf("ADDC %5d          ", tm.w);
 #endif
 	    break;
 	    
         case 9:                                      /* SUB */
             tm.b[0] = rd(pc.w++);
             tm.b[1] = rd(pc.w++);
-	    ac.w = EXT(ac.b[0]) - EXT(rd(tm.w));
+	    ac.w = SEXT(ac.b[1]) + EXT(ac.b[0]) - EXT(rd(tm.w));
 #ifdef DBG
-	    printf("SUB  %5d          ", tm.w);
+	    printf("SUBC %5d          ", tm.w);
 #endif
             break;
 
-        case 10:                                     /* ADDC abs */
-            tm.b[0] = rd(pc.w++);
-            tm.b[1] = rd(pc.w++);
-	    ac.w = SEXT(ac.b[1]) + EXT(rd(tm.w));
-#ifdef DBG
-	    printf("ADDC %5d          ", tm.w);
-#endif
-	    break;
-	    
-        case 11:                                     /* J */
+        case 10:                                     /* J */
             tm.b[0] = rd(pc.w++);
             tm.b[1] = rd(pc.w++);
 	    ac.w = pc.w;
@@ -363,7 +353,7 @@ void execute (void)
 #endif
             break;
 	    
-        case 12:                                     /* TST */
+        case 11:                                     /* TST */
 	    if (((int16_t)SEXT(ac.b[0])) < 0)
                 tm.w = SEXT(rd(pc.w+0));
             else if (((int16_t)SEXT(ac.b[0])) > 0)

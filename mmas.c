@@ -17,10 +17,9 @@
 #define TSHL  306
 #define TSHR  307
 #define TADD  308
-#define TADDC 309
-#define TSUB  310
-#define TJ    311
-#define TTST  312
+#define TSUB  309
+#define TJ    310
+#define TTST  311
 
 #define TERR  400
 
@@ -135,11 +134,10 @@ void initsymtab (void)
     initsym("OR",   TOR,   5);
     initsym("SHL",  TSHL,  6);
     initsym("SHR",  TSHR,  7);
-    initsym("ADD",  TADD,  8);
-    initsym("SUB",  TSUB,  9);
-    initsym("ADDC", TADDC, 10);
-    initsym("JUMP", TJ,    11);
-    initsym("TEST", TTST,  12);
+    initsym("ADDC", TADD,  8);
+    initsym("SUBC", TSUB,  9);
+    initsym("JUMP", TJ,    10);
+    initsym("TEST", TTST,  11);
 }
 
 void stringize (uint64_t n, char *s)
@@ -733,7 +731,6 @@ void line (void)
 	case TOR:
 	case TADD:
 	case TSUB:
-	case TADDC:
 	case TJ:
 	    opcode = symtab[tokval].value;
 	    result = expression(&value);
@@ -975,9 +972,8 @@ void outtoken (int token)
     case TOR:   fprintf(outf, "<OR>");   break;
     case TSHL:  fprintf(outf, "<SHL>");  break;
     case TSHR:  fprintf(outf, "<SHR>");  break;
-    case TADD:  fprintf(outf, "<ADD>");  break;
-    case TSUB:  fprintf(outf, "<SUB>");  break;
-    case TADDC: fprintf(outf, "<ADDC>"); break;
+    case TADD:  fprintf(outf, "<ADDC>"); break;
+    case TSUB:  fprintf(outf, "<SUBC>"); break;
     case TJ:    fprintf(outf, "<JUMP>"); break;
     case TTST:  fprintf(outf, "<TEST>"); break;
 

@@ -43,34 +43,29 @@ Opcode	      Mnemonic
 				into the high bit of A. The high bit of C is
 				replaced with a zero.
 				
-8 lo hi	      ADD  address	The contents of A and the memory byte loaded
-				from the specified address are treated as
-	      			unsigned quantities, extended to 16 bits,
-				and added. The high byte of the 16-bit result
-				is placed in C. The low byte of the 16-bit
-				result is placed in A.
+8 lo hi	      ADDC  address	The contents of C is treated as a signed quantity
+     	      	    		and extended to 16 bits. A and the memory byte
+				loaded from the specified address are treated as
+	      			unsigned quantities and extended to 16 bits.
+				Then all three of these operands are added. The
+				high byte of the 16-bit result is placed in C.
+				The low byte of the 16-bit result is placed in A.
 				
-9 lo hi	      SUB  address	The contents of A and and the memory byte loaded
-				from the specified address are treated as
-	      			unsigned quantities, extended to 16 bits,
-				and C is subtracted from A. The high byte of
-				the 16-bit result is placed in C. The low byte
-				of the 16-bit result is placed in A.
+9 lo hi	      SUBC  address	The contents of C is treated as a signed quantity
+     	      	    		and extended to 16 bits. A and and the memory byte
+				loaded from the specified address are treated as
+	      			unsigned quantities and extended to 16 bits.
+				Then C is added to A and the extended memory byte
+				is subtracted from their sum. The high byte of the
+				16-bite result is placed in C. The low byte of the
+				16-bit result is placed in A.
 
-10 lo hi      ADDC address	The contents of C is treated as a signed quantity
-      	      	   		and extended to 16 bits. The memory byte loaded
-				from the specified address is treated as an
-	      			unsigned quantities and extended to 16 bits,
-				and the two are added. The high byte of the 16-bit
-				result is placed in C. The low byte of the 16-bit
-				result is placed in A.
-				
-11 lo hi      JUMP address	The high byte of the PC is placed into C. The
+10 lo hi      JUMP address	The high byte of the PC is placed into C. The
       	      	   		low byte of the PC is placed in A. Then the
 				contents of the PC are replaced by the operand
 				address.
 
-12 o1 o2 o3   TEST t1,t2,t3	If A, treated as a signed quantity, is less
+11 o1 o2 o3   TEST t1,t2,t3	If A, treated as a signed quantity, is less
       	      	   		than zero, then the first byte after the
 				the opcode (o1), treated as a signed quantity,
 				is extended to 16 bits and added to the address
@@ -94,9 +89,8 @@ C language notation:
   5    OR    address      b = read(address); A = A | b; C = ~(A | b)
   6    SHL                C:A = C:A << 1
   7    SHR                C:A = C:A >> 1
-  8    ADD   address      b = read(address); C:A = ext(A) + ext(b)
-  9    SUB   address      b = read(address); C:A = ext(A) - ext(b)
- 10    ADDC  address      b = read(address); C:A = sext(C) + ext(b)
+  8    ADDC  address      b = read(address); C:A = sext(c) + ext(A) + ext(b)
+  9    SUBC  address      b = read(address); C:A = sext(c) + ext(A) - ext(b)
  11    JUMP  address      C:A = PC + 3; PC = address
  12    TEST  X,Y,Z        PC = PC + 1 + (A<0 ? sext(X)
                                              : (A=0 ? sext(Y)

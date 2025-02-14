@@ -40,6 +40,7 @@ pow:
 	S	epow+1		;save return address
 	SWAP
 	S	epow+2
+	;;
 	L	sp
 	S	polb+1
 	L	sp+1
@@ -59,58 +60,68 @@ stkw:	.=.+2
 	
 	;; decrement the stack pointer
 dsp:
-	S	edsp+1
+	S	dsp0+1
 	SWAP
-	S	edsp+2		;save the return address
-	;; 
+	S	dsp0+2		;save the return address
+	;;
+	L	c0
+	SWAP			;clear carry
 	L	sp
-	SUB	c1
+	SUBC	c1
 	S	sp
-	ADDC	sp+1
+	L	sp+1
+	SUBC	c0
 	S	sp+1
 	;; 
-edsp:
+dsp0:
 	JUMP	0		;return to caller
 
 
 	;; increment the stack pointer
 isp:
-	S	eisp+1
+	S	isp0+1
 	SWAP
-	S	eisp+2		;save the return address
-	;; 
-	L	sp
-	ADD	sp
+	S	isp0+2		;save the return address
+	;;
+	L	0
+	SWAP			;clear carry
+	L	c1
+	ADDC	sp
 	S	sp
+	L	c0
 	ADDC	sp+1
 	S	sp+1
 	;; 
-eisp:	JUMP	0		;return to caller
+isp0:	JUMP	0		;return to caller
 	
 
 puts:
 	;; output a string, a ptr to which is on the stack
-	S	eputs+1
+	S	puts1+1
 	SWAP
-	S	eputs+2		;save the return address
+	S	puts1+2		;save the return address
 	;; 
 	JUMP	pow		;pop the ptr from the stack
 	L	stkw
-	S	ckb+1
+	S	puts0+1
 	L	stkw+1
-	S	ckb+2
-ckb:	L	0		;get character
-	TEST	pch,eputs,pch
-pch:	S	outloc		;print the non-null character
+	S	puts0+2
+puts0:	L	0		;get character
+	TEST	.+4,puts1,.+4
+	S	outloc		;print the non-null character
 	;; increment the pointer
-	L	ckb+1
-	ADD	c1
-	S	ckb+1
-	ADDC	ckb+2
-	S	ckb+2
-	JUMP	ckb
-eputs:	JUMP	0		;return to caller
-	
+	L	c0
+	SWAP			;clear carry
+	L	c1
+	ADDC	puts0+1
+	S	puts0+1
+	L	c0
+	ADDC	puts0+2
+	S	puts0+2
+	JUMP	puts0
+puts1:	JUMP	0		;return to caller
+
+c0:	0
 c1:	1
 
 msg:	"Hello world.\n",0

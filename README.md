@@ -203,4 +203,4 @@ itszero:
 ```
 This will cause a jump to the label itszero if the contents of A are zero. Otherwise execution will continue with the instruction after the test instruction, as that is the value at .+4, where . is the address of the TEST instruction.
 
-Examination of the sample programs 'hw.s' and 'div.s' will help clarify how assembly language programs may be written.
+Examination of the sample programs 'hw.s' and 'primes.s' will help clarify how assembly language programs may be written.
